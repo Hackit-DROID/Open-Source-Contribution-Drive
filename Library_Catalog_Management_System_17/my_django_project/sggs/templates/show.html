@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>College MIS</title>
+</head>
+<body>
+    <h1>Welcome to College MIS</h1>
+
+    <h2>Students</h2>
+    <ul>
+        {% for s in students %}
+        <li>{{ s.regno }} - {{ s.name }} - {{ s.branch }} - {{ s.year }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Library</h2>
+    <ul>
+        {% for l in library %}
+        <li>{{ l.regno }} - {{ l.book_name }} (Issued: {{ l.date_issue }}, Return: {{ l.date_return }})</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Accounts</h2>
+    <ul>
+        {% for a in accounts %}
+        <li>{{ a.regno }} - {{ a.fees_type }} - Rs. {{ a.amount }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Hostel</h2>
+    <ul>
+        {% for h in hostels %}
+        <li>{{ h.regno }} - {{ h.hostel_name }} - Room: {{ h.room_no }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

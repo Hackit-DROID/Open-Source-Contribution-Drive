@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management Portal</title>
+    <style>
+        /* Reset and global */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f4f8; color: #333; }
+
+        /* Navigation Bar */
+        nav {
+            background: #1780f0;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        nav .logo { font-size: 22px; font-weight: bold; }
+        nav ul { list-style: none; display: flex; }
+        nav ul li { margin-left: 25px; }
+        nav ul li a { color: white; text-decoration: none; font-weight: 500; transition: 0.3s; }
+        nav ul li a:hover { color: #ffd700; }
+
+        /* Hero Section */
+        .hero {
+            height: 60vh;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        .hero h1 { font-size: 48px; margin-bottom: 15px; }
+        .hero p { font-size: 20px; margin-bottom: 25px; }
+
+        /* Quick Links / Cards */
+        .cards {
+            display: flex;
+            justify-content: center;
+            margin: 40px auto;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .card {
+            background: white;
+            width: 250px;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 { margin-bottom: 15px; color: #1780f0; }
+        .card a {
+            text-decoration: none;
+            color: white;
+            background: #1780f0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        .card a:hover { background: #0f5ac1; }
+
+        /* Footer */
+        footer {
+            background: #1780f0;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Student Portal</div>
+        <ul>
+            <li><a href="{% url 'all_students' %}">All Students</a></li>
+            <li><a href="{% url 'toppers' %}">Toppers</a></li>
+            <li><a href="{% url 'student_reports' %}">Reports</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Welcome to Student Management Portal</h1>
+        <p>Track student marks, averages, and grades efficiently</p>
+        <a href="{% url 'all_students' %}" style="background:#ffd700;color:#1780f0;">Get Started</a>
+    </div>
+
+    <!-- Quick Links Cards -->
+    <div class="cards">
+        <div class="card">
+            <h2>All Students</h2>
+            <p>View the complete list of students with marks</p>
+            <a href="{% url 'all_students' %}">View Students</a>
+        </div>
+        <div class="card">
+            <h2>Toppers</h2>
+            <p>See the top scorers in each subject</p>
+            <a href="{% url 'toppers' %}">View Toppers</a>
+        </div>
+        <div class="card">
+            <h2>Reports</h2>
+            <p>Check student averages and grades</p>
+            <a href="{% url 'student_reports' %}">View Reports</a>
+        </div>
+        <div class="card">
+    <h2>NumPy Methods</h2>
+    <p>Explore all available NumPy methods in a searchable table.</p>
+    <a href="{% url 'numpy_methods' %}">View NumPy Methods</a>
+</div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2025 Student Management Portal. All rights reserved.
+    </footer>
+
+</body>
+</html>

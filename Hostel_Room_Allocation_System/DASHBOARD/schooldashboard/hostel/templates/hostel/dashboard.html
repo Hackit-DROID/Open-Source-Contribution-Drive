@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hostel Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-white">
+  <div class="container mx-auto p-8">
+    <h1 class="text-4xl font-bold mb-6 text-center">🏠 Hostel Dashboard</h1>
+
+    <div class="flex justify-between items-center mb-6">
+      <a href="{% url 'hostel_add' %}" class="bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600 transition">+ Add Record</a>
+      <form method="get" class="flex gap-2">
+        <input type="text" name="q" placeholder="Search student..." class="px-3 py-2 rounded text-black">
+        <button type="submit" class="bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600">Search</button>
+      </form>
+    </div>
+
+    <div class="overflow-x-auto bg-white text-black rounded-lg shadow-lg">
+      <table class="min-w-full border border-gray-300">
+        <thead class="bg-gray-100 text-gray-800">
+          <tr>
+            <th class="px-4 py-2">Student</th>
+            <th class="px-4 py-2">Room No</th>
+            <th class="px-4 py-2">Block</th>
+            <th class="px-4 py-2">Floor</th>
+            <th class="px-4 py-2">Warden</th>
+            <th class="px-4 py-2">Rent</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in hostels %}
+          <tr class="hover:bg-gray-200 transition">
+            <td class="px-4 py-2">{{ h.student_name }}</td>
+            <td class="px-4 py-2">{{ h.room_no }}</td>
+            <td class="px-4 py-2">{{ h.block }}</td>
+            <td class="px-4 py-2">{{ h.floor }}</td>
+            <td class="px-4 py-2">{{ h.warden_name }}</td>
+            <td class="px-4 py-2">₹{{ h.rent }}</td>
+            <td class="px-4 py-2">{{ h.status }}</td>
+            <td class="px-4 py-2 space-x-2">
+              <a href="{% url 'hostel_edit' h.id %}" class="text-blue-600 hover:underline">Edit</a>
+              <a href="{% url 'hostel_delete' h.id %}" class="text-red-600 hover:underline">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+age,salary,experience_years,city,purchased
+25,30000,1,Delhi,0
+32,45000,5,Mumbai,1
+47,52000,20,Chennai,1
+51,58000,24,Delhi,1
+62,72000,30,Kolkata,1
+41,61000,15,Mumbai,1
+29,39000,3,Chennai,0
+34,43000,6,Delhi,0
+55,69000,28,Kolkata,1
+48,57000,22,Mumbai,1

@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MIS Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <script
+      src="https://kit.fontawesome.com/a81368914c.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2>MIS<span>Panel</span></h2>
+      <a href="#" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="#"><i class="fas fa-user-graduate"></i> Students</a>
+      <a href="#"><i class="fas fa-book"></i> Courses</a>
+      <a href="#"><i class="fas fa-file-alt"></i> Reports</a>
+      <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <h1>Dashboard Overview</h1>
+        <div class="profile">
+          <img src="https://i.pravatar.cc/40" alt="Profile" />
+          <span>Admin</span>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Students</h3>
+          <p>1200</p>
+        </div>
+        <div class="card">
+          <h3>Courses</h3>
+          <p>45</p>
+        </div>
+        <div class="card">
+          <h3>Admissions</h3>
+          <p>87</p>
+        </div>
+        <div class="card">
+          <h3>Reports</h3>
+          <p>32</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

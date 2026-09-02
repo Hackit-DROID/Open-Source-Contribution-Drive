@@ -1,0 +1,35 @@
+<!-- college_mis/account/templates/account/account_list.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Accounts</title>
+</head>
+<body>
+    <h1>Student Accounts</h1>
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Fee Paid</th>
+                <th>Fee Pending</th>
+                <th>Last Payment</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>{{ account.student.name }}</td>
+                <td>{{ account.fee_paid }}</td>
+                <td>{{ account.fee_pending }}</td>
+                <td>{{ account.last_payment }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No accounts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Report — {{ student.name }}{% endblock %}
+
+{% block content %}
+<!-- ═══ Report Header ═══ -->
+<div class="report-header animate-in">
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">📘 MARKSHEET MANAGEMENT SYSTEM</p>
+    <h1>📄 Student Marksheet</h1>
+    <div class="student-info">
+        <div class="info-item"><strong>🧑‍🎓 Name:</strong> {{ student.name }}</div>
+        <div class="info-item"><strong>🔢 Roll No:</strong> {{ student.roll_no }}</div>
+        <div class="info-item"><strong>🏫 Branch:</strong> {{ student.branch }}</div>
+        <div class="info-item"><strong>📅 Year:</strong> {{ student.year }}</div>
+    </div>
+</div>
+
+{% if marks|length > 0 %}
+    <!-- ═══ Marks Table ═══ -->
+    <div class="card animate-in">
+        <div class="card-title">📊 Subject-wise Marks</div>
+        <div class="card-subtitle">Test 1 (20) + Test 2 (20) + Final (60) = 100 per subject</div>
+
+        <div class="table-container mt-2">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Subject</th>
+                        <th>Test 1 (20)</th>
+                        <th>Test 2 (20)</th>
+                        <th>Final (60)</th>
+                        <th>Total (100)</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in marks %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong style="color: var(--text-bright);">
+                            {% if loop.index == 1 %}📐{% elif loop.index == 2 %}⚛️{% elif loop.index == 3 %}🧪{% elif loop.index == 4 %}💻{% else %}📖{% endif %}
+                            {{ m.subject }}
+                        </strong></td>
+                        <td style="font-family: 'JetBrains Mono', monospace;">{{ m.test1 }}</td>
+                        <td style="font-family: 'JetBrains Mono', monospace;">{{ m.test2 }}</td>
+                        <td style="font-family: 'JetBrains Mono', monospace;">{{ m.final_exam }}</td>
+                        <td>
+                            <strong style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem;
+                                color: {% if m.total() >= 80 %}var(--success){% elif m.total() >= 60 %}var(--info){% elif m.total() >= 40 %}var(--warning){% else %}var(--danger){% endif %};">
+                                {{ m.total() }}
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="badge grade-{{ m.grade()|replace('+', 'plus') }}">{{ m.grade() }}</span>
+                        </td>
+                        <td>
+                            {% if m.is_pass() %}
+                                <span class="badge badge-success">✅ Pass</span>
+                            {% else %}
+                                <span class="badge badge-danger">❌ Fail</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="background: rgba(99, 102, 241, 0.08);">
+                        <td colspan="5" style="text-align: right; font-weight: 700; font-size: 1.1rem; color: var(--text-bright);">
+                            🎯 Grand Total:
+                        </td>
+                        <td colspan="3">
+                            <strong style="font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--accent-light);">
+                                {{ total }} / 500
+                            </strong>
+                            <span style="color: var(--text-secondary); margin-left: 8px;">({{ "%.1f"|format(percentage) }}%)</span>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══ Visual Progress ═══ -->
+    <div class="card mt-3 animate-in">
+        <div class="card-title">📈 Visual Performance</div>
+
+        {% for m in marks %}
+        <div style="margin-bottom: 1rem;">
+            <div class="d-flex justify-between align-center mb-1">
+                <span style="font-weight: 600; color: var(--text-bright); font-size: 0.9rem;">{{ m.subject }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-secondary);">{{ m.total() }}/100</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar {% if m.total() >= 80 %}excellent{% elif m.total() >= 60 %}good{% elif m.total() >= 40 %}average{% else %}poor{% endif %}"
+                     style="width: {{ m.total() }}%;">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Overall -->
+        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+            <div class="d-flex justify-between align-center mb-1">
+                <span style="font-weight: 700; color: var(--accent-light); font-size: 1rem;">🎯 Overall</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent-light);">{{ "%.1f"|format(percentage) }}%</span>
+            </div>
+            <div class="progress-bar-container" style="height: 14px;">
+                <div class="progress-bar {% if percentage >= 80 %}excellent{% elif percentage >= 60 %}good{% elif percentage >= 40 %}average{% else %}poor{% endif %}"
+                     style="width: {{ percentage }}%;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div class="text-center mt-3">
+            {% if result == 'Pass' %}
+                <span style="font-size: 1.5rem; font-weight: 800; color: var(--success);">✅ PASSED</span>
+            {% else %}
+                <span style="font-size: 1.5rem; font-weight: 800; color: var(--danger);">❌ FAILED</span>
+            {% endif %}
+            <span style="display: block; margin-top: 4px; color: var(--text-secondary); font-size: 0.9rem;">
+                Overall Grade: <span class="badge grade-{{ overall_grade|replace('+', 'plus') }}" style="font-size: 0.85rem;">{{ overall_grade }}</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- ═══ AI Report ═══ -->
+    <div class="ai-report animate-in">
+        <div class="ai-report-header">
+            <span style="font-size: 1.5rem;">🤖</span>
+            <h3>AI Performance Analysis</h3>
+            <span class="ai-provider-badge">
+                {% if provider == 'openai' %}🧠 OpenAI GPT{% elif provider == 'ollama' %}🦙 Ollama{% else %}📊 Built-in Analyzer{% endif %}
+            </span>
+        </div>
+        <div class="ai-report-content">{{ ai_report }}</div>
+    </div>
+
+    <!-- ═══ Actions ═══ -->
+    <div class="d-flex gap-2 mt-3 no-print" style="justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('add_marks', student_id=student.id) }}" class="btn btn-outline">✏️ Edit Marks</a>
+        <button onclick="window.print()" class="btn btn-primary">🖨️ Print Marksheet</button>
+        <a href="{{ url_for('compare_report', student_id=student.id) }}" class="btn btn-success">🔄 Compare AI Models</a>
+        <a href="{{ url_for('students_list') }}" class="btn btn-outline">← Back to Students</a>
+    </div>
+
+{% else %}
+    <div class="empty-state">
+        <div class="icon">📝</div>
+        <h3>No Marks Added Yet</h3>
+        <p>This student doesn't have any marks recorded. Add marks first to generate a report.</p>
+        <a href="{{ url_for('add_marks', student_id=student.id) }}" class="btn btn-primary">📝 Add Marks Now</a>
+    </div>
+{% endif %}
+{% endblock %}

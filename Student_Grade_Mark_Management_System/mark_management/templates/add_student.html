@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Add Student{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>➕ Add New Student</h1>
+    <p>Fill in the student details below to register them in the system</p>
+</div>
+
+<div style="max-width: 650px; margin: 0 auto;">
+    <div class="card animate-in">
+        <div class="card-title">🧑‍🎓 Student Information</div>
+        <div class="card-subtitle">All fields are required</div>
+
+        <form method="POST" action="{{ url_for('add_student') }}">
+
+            <!-- Name -->
+            <div class="form-group">
+                <label class="form-label">👤 Full Name</label>
+                <input type="text" name="name" class="form-input" placeholder="e.g., Rahul Sharma" required>
+            </div>
+
+            <!-- Roll Number -->
+            <div class="form-group">
+                <label class="form-label">🔢 Roll Number</label>
+                <input type="text" name="roll_no" class="form-input" placeholder="e.g., CSE-2024-001" required>
+                <div class="form-hint">Must be unique for each student</div>
+            </div>
+
+            <!-- Branch -->
+            <div class="form-group">
+                <label class="form-label">🏫 Branch</label>
+                <select name="branch" class="form-select" required>
+                    <option value="">— Select Branch —</option>
+                    {% for branch in branches %}
+                        <option value="{{ branch }}">{{ branch }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Year -->
+            <div class="form-group">
+                <label class="form-label">📅 Year</label>
+                <select name="year" class="form-select" required>
+                    <option value="">— Select Year —</option>
+                    {% for code, label in years %}
+                        <option value="{{ code }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Email (optional) -->
+            <div class="form-group">
+                <label class="form-label">📧 Email (Optional)</label>
+                <input type="email" name="email" class="form-input" placeholder="e.g., rahul@example.com">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block mt-2">
+                ✅ Register Student
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

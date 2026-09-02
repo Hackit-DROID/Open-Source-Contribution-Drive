@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Compare AI Reports — {{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🔄 Multi-Model AI Comparison</h1>
+    <p>Compare performance reports from different AI models for <strong>{{ student.name }}</strong></p>
+</div>
+
+<!-- Student Info -->
+<div class="card mb-3 animate-in">
+    <div class="d-flex align-center gap-2 flex-wrap">
+        <span class="badge badge-primary">🧑‍🎓 {{ student.name }}</span>
+        <span class="badge badge-info">🏫 {{ student.branch }}</span>
+        <span class="badge badge-success">📅 {{ student.year }}</span>
+        <span class="badge badge-warning">📊 Total: {{ total }}/500 ({{ "%.1f"|format(percentage) }}%)</span>
+    </div>
+</div>
+
+<!-- Comparison Grid -->
+{% for provider_name, report_text in reports.items() %}
+<div class="ai-report animate-in" style="margin-bottom: 1.5rem;">
+    <div class="ai-report-header">
+        <span style="font-size: 1.5rem;">
+            {% if provider_name == 'openai' %}🧠{% elif provider_name == 'ollama' %}🦙{% else %}📊{% endif %}
+        </span>
+        <h3>
+            {% if provider_name == 'openai' %}OpenAI GPT Report
+            {% elif provider_name == 'ollama' %}Ollama (Local LLM) Report
+            {% else %}Built-in Analyzer Report{% endif %}
+        </h3>
+        <span class="ai-provider-badge">{{ provider_name }}</span>
+    </div>
+    <div class="ai-report-content">{{ report_text }}</div>
+</div>
+{% endfor %}
+
+<div class="d-flex gap-2 mt-3" style="justify-content: center;">
+    <a href="{{ url_for('report', student_id=student.id) }}" class="btn btn-outline">← Back to Report</a>
+    <a href="{{ url_for('students_list') }}" class="btn btn-primary">👥 All Students</a>
+</div>
+{% endblock %}

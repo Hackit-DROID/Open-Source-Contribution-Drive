@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Register - SGGS Library{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 520px; margin: 0 auto;">
+    <h2>Student Registration</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Create account</button>
+    </form>
+    <p>Already registered? <a href="{% url 'users:login' %}">Login</a>.</p>
+</div>
+{% endblock %}

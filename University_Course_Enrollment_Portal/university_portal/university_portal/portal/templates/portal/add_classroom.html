@@ -1,0 +1,35 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Add Classroom - University Portal{% endblock %}
+
+{% block content %}
+<div class="card-header-custom">
+    <h2 class="card-title">🏠 Add New Classroom</h2>
+    <a href="{% url 'classrooms_list' %}" class="btn btn-outline-primary">← Back to Classrooms</a>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label for="building" class="form-label">Building</label>
+                <input type="text" class="form-control" id="building" name="building" required>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label for="room_no" class="form-label">Room Number</label>
+                <input type="text" class="form-control" id="room_no" name="room_no" required>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label for="capacity" class="form-label">Capacity</label>
+                <input type="number" class="form-control" id="capacity" name="capacity" required>
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Classroom</button>
+</form>
+{% endblock %}

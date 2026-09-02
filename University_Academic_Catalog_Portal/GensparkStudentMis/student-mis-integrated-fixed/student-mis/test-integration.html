@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Test - Student MIS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .test-result { padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .test-success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .test-error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .test-pending { background-color: #fff3cd; border: 1px solid #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">🧪 Student MIS Integration Test</h1>
+        <p class="lead">Testing frontend-backend connectivity...</p>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Backend Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="backendStatus" class="test-result test-pending">
+                    ⏳ Checking backend connection...
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">API Endpoints Test</h5>
+            </div>
+            <div class="card-body">
+                <div id="studentsTest" class="test-result test-pending">⏳ Testing /api/students/...</div>
+                <div id="departmentsTest" class="test-result test-pending">⏳ Testing /api/departments/...</div>
+                <div id="coursesTest" class="test-result test-pending">⏳ Testing /api/courses/...</div>
+                <div id="instructorsTest" class="test-result test-pending">⏳ Testing /api/instructors/...</div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Data Preview</h5>
+            </div>
+            <div class="card-body">
+                <div id="dataPreview"></div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-primary btn-lg" onclick="runTests()">🔄 Run Tests Again</button>
+            <a href="index.html" class="btn btn-success btn-lg">✅ Go to Main App</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8001/api';
+
+        async function testEndpoint(name, url, elementId) {
+            const element = document.getElementById(elementId);
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                const count = data.results ? data.results.length : (Array.isArray(data) ? data.length : 0);
+                element.className = 'test-result test-success';
+                element.innerHTML = `✅ ${name} - Success! (${count} items found)`;
+                return data;
+            } catch (error) {
+                element.className = 'test-result test-error';
+                element.innerHTML = `❌ ${name} - Failed: ${error.message}`;
+                return null;
+            }
+        }
+
+        async function runTests() {
+            // Reset all tests
+            document.getElementById('backendStatus').className = 'test-result test-pending';
+            document.getElementById('backendStatus').innerHTML = '⏳ Checking backend connection...';
+            
+            // Test backend connection
+            try {
+                const response = await fetch(API_BASE_URL + '/');
+                if (response.ok) {
+                    document.getElementById('backendStatus').className = 'test-result test-success';
+                    document.getElementById('backendStatus').innerHTML = '✅ Backend is running on http://localhost:8001';
+                } else {
+                    throw new Error('Backend not responding');
+                }
+            } catch (error) {
+                document.getElementById('backendStatus').className = 'test-result test-error';
+                document.getElementById('backendStatus').innerHTML = `❌ Backend is NOT running! Start it with: <code>python manage.py runserver 8001</code>`;
+                return; // Stop tests if backend is down
+            }
+
+            // Test endpoints
+            const students = await testEndpoint('Students API', API_BASE_URL + '/students/', 'studentsTest');
+            const departments = await testEndpoint('Departments API', API_BASE_URL + '/departments/', 'departmentsTest');
+            const courses = await testEndpoint('Courses API', API_BASE_URL + '/courses/', 'coursesTest');
+            const instructors = await testEndpoint('Instructors API', API_BASE_URL + '/instructors/', 'instructorsTest');
+
+            // Show data preview
+            if (students && students.results && students.results.length > 0) {
+                const previewHtml = `
+                    <h5>Sample Student Data:</h5>
+                    <pre>${JSON.stringify(students.results[0], null, 2)}</pre>
+                    <p class="text-success"><strong>✅ Integration is working!</strong> Frontend can now communicate with backend.</p>
+                    <p>Total students in database: <strong>${students.count}</strong></p>
+                `;
+                document.getElementById('dataPreview').innerHTML = previewHtml;
+            } else {
+                document.getElementById('dataPreview').innerHTML = '<p class="text-warning">No data to preview</p>';
+            }
+        }
+
+        // Run tests on page load
+        window.onload = runTests;
+    </script>
+</body>
+</html>

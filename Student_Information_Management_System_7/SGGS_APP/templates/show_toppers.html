@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Topper Students</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #e1bee7);
+      margin: 0;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    h1 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 20px;
+      font-size: 36px;
+    }
+
+    h2 {
+      color: #444;
+      margin-bottom: 15px;
+      border-left: 5px solid #007bff;
+      padding-left: 10px;
+    }
+
+    .topper-cards {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .card {
+      flex: 1;
+      min-width: 250px;
+      background: #f9fbff;
+      border-left: 6px solid #007bff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card b {
+      color: #007bff;
+      font-size: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px 15px;
+      text-align: center;
+    }
+
+    th {
+      background: #007bff;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    tr:hover {
+      background: #eef7ff;
+    }
+
+    .highlight {
+      background: #fff3cd !important;
+      font-weight: bold;
+    }
+
+    .award-box {
+      margin-top: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #fff8e1, #ffe0b2);
+      border: 2px solid #ffb300;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .award-box h2 {
+      color: #d35400;
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .award-box p {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏅 Student Toppers</h1>
+
+    <!-- Subject-wise toppers -->
+    <div class="section">
+      <h2>Subject-wise Toppers</h2>
+      <div class="topper-cards">
+        <div class="card">
+          <p><b>Physics Topper:</b><br>{{ topper_phy.student_name }} ({{ topper_phy.phy }})</p>
+        </div>
+        <div class="card">
+          <p><b>Chemistry Topper:</b><br>{{ topper_chem.student_name }} ({{ topper_chem.chem }})</p>
+        </div>
+        <div class="card">
+          <p><b>Maths Topper:</b><br>{{ topper_math.student_name }} ({{ topper_math.math }})</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- All students with averages -->
+    <div class="section">
+      <h2>All Students with Averages</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Reg. No</th>
+            <th>Name</th>
+            <th>Branch</th>
+            <th>Physics</th>
+            <th>Chemistry</th>
+            <th>Maths</th>
+            <th>Total</th>
+            <th>Average</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in student_averages %}
+          <tr {% if overall_topper and entry.student.regno == overall_topper.student.regno %}class="highlight"{% endif %}>
+            <td>{{ entry.student.regno }}</td>
+            <td>{{ entry.student.student_name }}</td>
+            <td>{{ entry.student.branch }}</td>
+            <td>{{ entry.student.phy }}</td>
+            <td>{{ entry.student.chem }}</td>
+            <td>{{ entry.student.math }}</td>
+            <td>{{ entry.student.phy|add:entry.student.chem|add:entry.student.math }}</td>
+            <td>{{ entry.average|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8">No students available.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Overall topper -->
+    {% if overall_topper %}
+    <div class="award-box">
+      <h2>🏆 Overall Topper</h2>
+      <p>
+        <b>{{ overall_topper.student.student_name }}</b>  
+        with an average of <b>{{ overall_topper.average|floatformat:2 }}</b>
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>

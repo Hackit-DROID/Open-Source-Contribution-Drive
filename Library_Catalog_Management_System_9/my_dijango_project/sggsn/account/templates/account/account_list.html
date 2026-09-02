@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account List</title>
+</head>
+<body>
+    <h1>All Accounts</h1>
+    <ul>
+        {% for account in accounts %}
+            <li>
+                {{ account.student_name }} - Balance: {{ account.balance }}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

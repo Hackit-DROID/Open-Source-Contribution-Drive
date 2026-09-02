@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Records</title>
+</head>
+<body>
+    <h1>Library Records</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Reg No</th>
+            <th>Book Title</th>
+            <th>Issue Date</th>
+            <th>Return Date</th>
+            <th>Fine</th>
+        </tr>
+        {% for record in libraries %}
+        <tr>
+            <td>{{ record.id }}</td>
+            <td>{{ record.student }}</td>
+            <td>{{ record.regno }}</td>
+            <td>{{ record.book_title }}</td>
+            <td>{{ record.issue_date }}</td>
+            <td>{{ record.return_date }}</td>
+            <td>{{ record.fine }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

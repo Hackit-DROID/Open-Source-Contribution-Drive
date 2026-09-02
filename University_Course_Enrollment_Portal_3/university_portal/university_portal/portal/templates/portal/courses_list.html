@@ -1,0 +1,75 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}All Courses - University Portal{% endblock %}
+
+{% block content %}
+<div class="card-header-custom mb-3">
+  <div class="d-flex align-items-center gap-3">
+    <h1 class="card-title d-flex align-items-center text-dark mb-0">
+      <i class="bi bi-book me-2 text-primary"></i> All Courses
+    </h1>
+    <span class="badge bg-gradient text-white shadow-sm px-3 py-2"
+          style="background: linear-gradient(90deg, #2c3e50, #5bc0be); font-size: 0.9rem;">
+      {{ courses|length }} courses
+    </span>
+  </div>
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="muted">
+      Browse the course catalogue — click a course for details (if available).
+    </div>
+    <a href="{% url 'add_course' %}" class="btn btn-primary">+ Add Course</a>
+  </div>
+</div>
+
+<div class="table-responsive rounded-lg shadow-soft">
+  <table class="table align-middle table-striped table-hover mb-0">
+    <thead>
+      <tr class="text-uppercase small text-muted">
+        <th><i class="bi bi-hash me-1"></i> Course ID</th>
+        <th><i class="bi bi-book me-1"></i> Course Title</th>
+        <th><i class="bi bi-building me-1"></i> Department</th>
+        <th><i class="bi bi-award me-1"></i> Credits</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for course in courses %}
+      <tr class="bg-white">
+        <td>
+          <span class="badge rounded-pill text-bg-warning text-dark px-3 py-2 fw-semibold">
+            {{ course.course_id }}
+          </span>
+        </td>
+        <td>
+          <strong class="text-dark">{{ course.title }}</strong>
+          {% if course.subtitle %}
+            <div class="muted small">{{ course.subtitle }}</div>
+          {% endif %}
+        </td>
+        <td>
+          <span class="badge rounded-pill text-bg-info text-dark px-3 py-2 fw-semibold">
+            {{ course.dept_name }}
+          </span>
+        </td>
+        <td>
+          <span class="badge bg-success-subtle text-success px-3 py-2 fw-semibold">
+            {{ course.credits }}
+          </span>
+        </td>
+        <td>
+          <a href="{% url 'delete_course' course.course_id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this course?')">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center py-4">
+          <div class="text-muted">
+            <i class="bi bi-exclamation-circle me-1"></i> No courses found.
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

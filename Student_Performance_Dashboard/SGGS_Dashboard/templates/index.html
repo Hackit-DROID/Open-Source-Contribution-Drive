@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SGGS Institute – Student Management Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="/static/css/dashboard.css"/>
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><span>S</span></div>
+    <div class="brand-text">
+      <div class="brand-title">SGGS</div>
+      <div class="brand-sub">Institute of Engg. & Technology</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="#" class="nav-item active" data-section="dashboard">
+      <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-section="students">
+      <i class="fas fa-users"></i><span>Students</span>
+    </a>
+    <div class="nav-section-label">Modules</div>
+    <a href="#" class="nav-item" data-section="marks">
+      <i class="fas fa-graduation-cap"></i><span>Academic Marks</span>
+    </a>
+    <a href="#" class="nav-item" data-section="attendance">
+      <i class="fas fa-calendar-check"></i><span>Attendance</span>
+    </a>
+    <a href="#" class="nav-item" data-section="library">
+      <i class="fas fa-book-open"></i><span>Library</span>
+    </a>
+    <a href="#" class="nav-item" data-section="hostel">
+      <i class="fas fa-building"></i><span>Hostel</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">A</div>
+      <div class="user-info"><div class="user-name">Admin</div><div class="user-role">Super Admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+      <div class="page-title" id="pageTitle">Dashboard Overview</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="globalSearch" placeholder="Search students…"/>
+      </div>
+      <div class="topbar-icon"><i class="fas fa-bell"></i><span class="badge">3</span></div>
+      <div class="topbar-icon"><i class="fas fa-cog"></i></div>
+    </div>
+  </header>
+
+  <!-- ── SECTION: Dashboard ── -->
+  <section class="section active" id="section-dashboard">
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card blue"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-body"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Total Students</div></div><div class="stat-trend up"><i class="fas fa-arrow-up"></i> 4.2%</div></div>
+      <div class="stat-card green"><div class="stat-icon"><i class="fas fa-building"></i></div><div class="stat-body"><div class="stat-val" id="stat-hostel">—</div><div class="stat-label">Hostel Residents</div></div><div class="stat-trend up"><i class="fas fa-arrow-up"></i> 2.1%</div></div>
+      <div class="stat-card orange"><div class="stat-icon"><i class="fas fa-book"></i></div><div class="stat-body"><div class="stat-val" id="stat-library">—</div><div class="stat-label">Books Issued</div></div><div class="stat-trend neutral"><i class="fas fa-minus"></i> 0%</div></div>
+      <div class="stat-card red"><div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-body"><div class="stat-val" id="stat-attendance">—</div><div class="stat-label">Low Attendance</div></div><div class="stat-trend down"><i class="fas fa-arrow-down"></i> 1.8%</div></div>
+      <div class="stat-card purple"><div class="stat-icon"><i class="fas fa-chart-bar"></i></div><div class="stat-body"><div class="stat-val" id="stat-avgmarks">—</div><div class="stat-label">Avg. Marks</div></div><div class="stat-trend up"><i class="fas fa-arrow-up"></i> 3.5%</div></div>
+      <div class="stat-card teal"><div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div><div class="stat-body"><div class="stat-val" id="stat-overdue">—</div><div class="stat-label">Overdue Books</div></div><div class="stat-trend down"><i class="fas fa-arrow-down"></i> 0.5%</div></div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+      <div class="chart-card wide">
+        <div class="chart-header"><h3>Branch Distribution</h3></div>
+        <canvas id="branchChart" height="180"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><h3>Grade Distribution</h3></div>
+        <canvas id="gradeChart" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><h3>Attendance Overview</h3></div>
+        <canvas id="attendanceChart" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Tables Row -->
+    <div class="tables-row">
+      <div class="table-card">
+        <div class="table-header"><h3><i class="fas fa-trophy"></i> Top Performers</h3></div>
+        <table class="mini-table">
+          <thead><tr><th>#</th><th>Student</th><th>Branch</th><th>Avg</th></tr></thead>
+          <tbody id="topStudentsBody"></tbody>
+        </table>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h3><i class="fas fa-exclamation-triangle"></i> Attendance Alerts</h3></div>
+        <table class="mini-table">
+          <thead><tr><th>Student</th><th>Roll No</th><th>Attendance</th></tr></thead>
+          <tbody id="attendanceAlertsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECTION: Students ── -->
+  <section class="section" id="section-students">
+    <div class="section-toolbar">
+      <div class="toolbar-filters">
+        <input type="text" id="studentSearch" placeholder="Search by name / roll no…" class="filter-input"/>
+        <select id="branchFilter" class="filter-select"><option value="">All Branches</option></select>
+        <select id="yearFilter" class="filter-select">
+          <option value="">All Years</option>
+          <option value="1">Year 1</option><option value="2">Year 2</option>
+          <option value="3">Year 3</option><option value="4">Year 4</option>
+        </select>
+        <select id="hostelFilter" class="filter-select">
+          <option value="">All Students</option>
+          <option value="hostel">Hostel</option>
+          <option value="day">Day Scholar</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <span class="result-count" id="resultCount">Loading…</span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table" id="studentsTable">
+        <thead>
+          <tr>
+            <th>Roll No</th><th>Student Name</th><th>Branch</th><th>Year</th>
+            <th>Avg Marks</th><th>Attendance</th><th>Books</th>
+            <th>Hostel</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="studentsBody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </section>
+
+  <!-- ── SECTION: Marks ── -->
+  <section class="section" id="section-marks">
+    <div class="section-header-text"><h2>Academic Marks Overview</h2><p>ISE1 · ISE2 · End Semester Performance</p></div>
+    <div class="module-placeholder">
+      <i class="fas fa-graduation-cap fa-3x"></i>
+      <p>Select a student from the <strong>Students</strong> tab to view detailed marks.</p>
+      <button class="btn-primary" onclick="switchSection('students')">Go to Students</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION: Attendance ── -->
+  <section class="section" id="section-attendance">
+    <div class="section-header-text"><h2>Attendance Records</h2></div>
+    <div class="module-placeholder">
+      <i class="fas fa-calendar-check fa-3x"></i>
+      <p>Select a student from the <strong>Students</strong> tab to view attendance.</p>
+      <button class="btn-primary" onclick="switchSection('students')">Go to Students</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION: Library ── -->
+  <section class="section" id="section-library">
+    <div class="section-header-text"><h2>Library Management</h2></div>
+    <div class="module-placeholder">
+      <i class="fas fa-book-open fa-3x"></i>
+      <p>Select a student from the <strong>Students</strong> tab to view library records.</p>
+      <button class="btn-primary" onclick="switchSection('students')">Go to Students</button>
+    </div>
+  </section>
+
+  <!-- ── SECTION: Hostel ── -->
+  <section class="section" id="section-hostel">
+    <div class="section-header-text"><h2>Hostel Management</h2></div>
+    <div class="module-placeholder">
+      <i class="fas fa-building fa-3x"></i>
+      <p>Select a student from the <strong>Students</strong> tab to view hostel details.</p>
+      <button class="btn-primary" onclick="switchSection('students')">Go to Students</button>
+    </div>
+  </section>
+</main>
+
+<!-- Student Detail Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="studentModal">
+    <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>

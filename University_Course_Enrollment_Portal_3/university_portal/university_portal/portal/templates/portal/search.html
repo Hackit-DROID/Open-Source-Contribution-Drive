@@ -1,0 +1,155 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Universal Search - University Portal{% endblock %}
+
+{% block content %}
+<div class="card-header-custom mb-3">
+  <div class="d-flex align-items-center gap-3">
+    <h1 class="card-title d-flex align-items-center text-dark mb-0">
+      <i class="bi bi-search me-2 text-primary"></i> Universal Search
+    </h1>
+    {% if query %}
+      <span class="badge bg-gradient text-white shadow-sm px-3 py-2"
+            style="background: linear-gradient(90deg, #2c3e50, #5bc0be); font-size: 0.9rem;">
+        Results for "{{ query }}"
+      </span>
+    {% endif %}
+  </div>
+  <div class="muted">Search across instructors, students, courses, and departments.</div>
+</div>
+
+<div class="card mb-4 rounded-lg shadow-soft">
+  <div class="card-body">
+    <form method="get" class="mb-0">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label for="type" class="form-label small fw-semibold">Search in</label>
+          <select id="type" name="type" class="form-select">
+            <option value="instructors" {% if search_type == 'instructors' %}selected{% endif %}>👨🏫 Instructors</option>
+            <option value="students" {% if search_type == 'students' %}selected{% endif %}>🧑🎓 Students</option>
+            <option value="courses" {% if search_type == 'courses' %}selected{% endif %}>📘 Courses</option>
+            <option value="departments" {% if search_type == 'departments' %}selected{% endif %}>🏫 Departments</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="query" class="form-label small fw-semibold">Search for</label>
+          <input type="text" id="query" name="query" value="{{ query }}" placeholder="Enter search term..." class="form-control" autocomplete="off" />
+          <div class="form-text muted">Tip: partial matches are supported, e.g. "Comp" will match "Computer Science".</div>
+        </div>
+
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-search me-1"></i> Search
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if query %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 mb-0">Results for <span class="text-primary">"{{ query }}"</span> in <strong>{{ search_type|title }}</strong></h2>
+    {% if results %}
+      <span class="badge bg-success fs-6">{{ results|length }} result{{ results|length|pluralize }}</span>
+    {% endif %}
+  </div>
+
+  {% if results %}
+    <div class="table-responsive rounded-lg shadow-soft">
+      <table class="table align-middle table-striped table-hover mb-0">
+        <thead>
+          <tr class="text-uppercase small text-muted">
+            {% if search_type == 'instructors' %}
+              <th>ID</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Salary</th>
+            {% elif search_type == 'students' %}
+              <th>ID</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Total Credits</th>
+            {% elif search_type == 'courses' %}
+              <th>Course ID</th>
+              <th>Title</th>
+              <th>Department</th>
+              <th>Credits</th>
+            {% elif search_type == 'departments' %}
+              <th>Department</th>
+              <th>Building</th>
+              <th>Budget</th>
+            {% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for item in results %}
+          <tr class="bg-white">
+            {% if search_type == 'instructors' %}
+              <td><span class="badge rounded-pill text-bg-secondary">{{ item.ID }}</span></td>
+              <td><strong>{{ item.name }}</strong>{% if item.title %}<div class="muted small">{{ item.title }}</div>{% endif %}</td>
+              <td><span class="badge rounded-pill text-bg-info text-dark px-3 py-2">{{ item.dept_name }}</span></td>
+              <td><span class="text-success fw-semibold">${{ item.salary|floatformat:0 }}</span></td>
+
+            {% elif search_type == 'students' %}
+              <td><span class="badge rounded-pill text-bg-secondary">{{ item.ID }}</span></td>
+              <td><strong>{{ item.name }}</strong></td>
+              <td><span class="badge rounded-pill text-bg-info text-dark px-3 py-2">{{ item.dept_name }}</span></td>
+              <td><span class="badge rounded-pill bg-primary text-white px-3 py-2">{{ item.tot_cred }}</span></td>
+
+            {% elif search_type == 'courses' %}
+              <td><span class="badge rounded-pill text-bg-warning text-dark px-3 py-2">{{ item.course_id }}</span></td>
+              <td>
+                <strong>{{ item.title }}</strong>
+                {% if item.subtitle %}<div class="muted small">{{ item.subtitle }}</div>{% endif %}
+              </td>
+              <td><span class="badge rounded-pill text-bg-info text-dark px-3 py-2">{{ item.dept_name }}</span></td>
+              <td><span class="badge rounded-pill bg-success text-white px-3 py-2">{{ item.credits }}</span></td>
+
+            {% elif search_type == 'departments' %}
+              <td><strong>{{ item.dept_name }}</strong></td>
+              <td><span class="badge rounded-pill text-bg-secondary px-3 py-2">{{ item.building }}</span></td>
+              <td><span class="text-success fw-semibold">${{ item.budget|floatformat:0 }}</span></td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning mt-3" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      No results found for "<strong>{{ query }}</strong>" in <strong>{{ search_type|title }}</strong>.
+    </div>
+  {% endif %}
+{% else %}
+  <div class="card rounded-lg shadow-soft">
+    <div class="card-header bg-light">
+      <h5 class="mb-0"><i class="bi bi-lightbulb me-1"></i> Search Tips</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <ul class="list-unstyled">
+            <li><strong><i class="bi bi-person-badge me-1"></i> Instructors:</strong> search by name, title, or department</li>
+            <li><strong><i class="bi bi-mortarboard me-1"></i> Students:</strong> search by name, student ID, or department</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <ul class="list-unstyled">
+            <li><strong><i class="bi bi-book me-1"></i> Courses:</strong> search by course ID, title, or department</li>
+            <li><strong><i class="bi bi-building me-1"></i> Departments:</strong> search by department name or building</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="alert alert-info mt-3" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        Search is case-insensitive and supports partial matches. Use quotes to search exact phrases.
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

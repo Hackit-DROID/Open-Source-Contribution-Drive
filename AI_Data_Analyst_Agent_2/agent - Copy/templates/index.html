@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AI Data Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>🤖 AI Dashboard</h2>
+            <p>Upload & Analyze Data</p>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+
+            <!-- Upload -->
+            <div class="card section">
+                <h3>📂 Upload CSV</h3>
+                <input type="file" id="file">
+                <button onclick="upload()">Upload</button>
+            </div>
+
+            <!-- Filters -->
+            <div class="card section">
+                <h3>🎯 Filters</h3>
+                <div id="filters" class="filters"></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card" id="rows">Total Rows</div>
+                <div class="stat-card" id="cols">Total Columns</div>
+                <div class="stat-card" id="num">Numeric Columns</div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts">
+                <div class="chart-box"><canvas id="barChart"></canvas></div>
+                <div class="chart-box"><canvas id="lineChart"></canvas></div>
+                <div class="chart-box"><canvas id="pieChart"></canvas></div>
+                <div class="chart-box"><canvas id="heatmapChart"></canvas></div>
+            </div>
+
+            <!-- Chat -->
+            <div class="card section">
+                <h3>💬 Ask About Data</h3>
+                <div class="chat">
+                    <input id="query" placeholder="Ask something...">
+                    <button onclick="ask()">Ask</button>
+                </div>
+                <pre id="response"></pre>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

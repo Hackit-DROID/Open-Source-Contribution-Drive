@@ -1,0 +1,104 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Section Timetable - University Portal{% endblock %}
+
+{% block content %}
+<div class="card-header-custom mb-3">
+  <div class="d-flex align-items-center gap-3">
+    <h1 class="card-title d-flex align-items-center text-dark mb-0">
+      <i class="bi bi-calendar3 me-2 text-primary"></i> Section Timetable
+    </h1>
+    <span class="badge bg-gradient text-white shadow-sm px-3 py-2"
+          style="background: linear-gradient(90deg, #2c3e50, #5bc0be); font-size: 0.9rem;">
+      {{ sections_data|length }} sections
+    </span>
+  </div>
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="muted">
+      Schedule of sections with their room and time-slot assignments.
+    </div>
+    <a href="{% url 'add_section' %}" class="btn btn-primary">+ Add Section</a>
+  </div>
+</div>
+
+<div class="table-responsive rounded-lg shadow-soft">
+  <table class="table align-middle table-striped table-hover mb-0">
+    <thead>
+      <tr class="text-uppercase small text-muted">
+        <th><i class="bi bi-book me-1"></i> Course</th>
+        <th><i class="bi bi-hash me-1"></i> Section</th>
+        <th><i class="bi bi-calendar me-1"></i> Semester</th>
+        <th><i class="bi bi-calendar-date me-1"></i> Year</th>
+        <th><i class="bi bi-geo-alt me-1"></i> Room</th>
+        <th><i class="bi bi-clock me-1"></i> Time Slot</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in sections_data %}
+      <tr class="bg-white">
+        <td>
+          <span class="badge rounded-pill text-bg-warning text-dark px-3 py-2 fw-semibold">
+            {{ item.section.course_id }}
+          </span>
+          {% if item.section.course_title %}
+            <div class="muted small mt-1">{{ item.section.course_title }}</div>
+          {% endif %}
+        </td>
+
+        <td>
+          <span class="badge rounded-pill text-bg-secondary px-3 py-2">
+            {{ item.section.sec_id }}
+          </span>
+        </td>
+
+        <td>
+          <span class="badge rounded-pill text-bg-info px-3 py-2 text-dark">
+            {{ item.section.semester }}
+          </span>
+        </td>
+
+        <td>
+          <span class="badge rounded-pill" style="background: linear-gradient(90deg,#2c3e50,#34495e); color: #fff; padding: .45rem .8rem;">
+            {{ item.section.year }}
+          </span>
+        </td>
+
+        <td>
+          <strong>{{ item.section.building }} {{ item.section.room_no }}</strong>
+          {% if item.section.floor %}
+            <div class="muted small">Floor {{ item.section.floor }}</div>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if item.time_slot %}
+            <div class="d-flex flex-column">
+              <span class="badge rounded-pill bg-success text-white px-3 py-2">
+                {{ item.time_slot.day }} — {{ item.time_slot.start_time }}:00 &ndash; {{ item.time_slot.end_time }}:00
+              </span>
+              {% if item.time_slot.note %}
+                <small class="muted mt-1">{{ item.time_slot.note }}</small>
+              {% endif %}
+            </div>
+          {% else %}
+            <span class="text-muted">Time slot {{ item.section.time_slot_id }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'delete_section' item.section.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this section?')">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center py-4">
+          <div class="text-muted">
+            <i class="bi bi-exclamation-circle me-1"></i> No sections found.
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

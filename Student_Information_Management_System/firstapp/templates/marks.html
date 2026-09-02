@@ -1,0 +1,49 @@
+{% block content %}
+<body style = "background-color: rgb(153, 83, 45);"></body>
+
+    <style>
+        .table{
+            margin-left: 55vh;
+        }
+        table, th, td {
+            background: rgb(255, 255, 255);
+            border: 1px solid;
+            padding: 15px;
+            color: rgb(27, 8, 92);
+            text-align: center;
+        }
+        h1{
+            margin-top: 45px;
+            text-align: center;
+            color: rgb(240, 239, 249);
+        }
+    </style>
+    <h1>Marks</h1>
+        <table class="table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Reg No</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Student Name</th>
+                <th scope="col">Marks</th>
+                <th scope="col">Semester</th>
+             </tr>
+            </thead>
+            <br>
+            {% for event in event_list %}
+            <tr>
+                <td>{{ event.Reg_no }}</td>
+                <td>{{ event.Subject}}</td>
+                <td>Vaishanvi</td>
+                <td>{{ event.marks}}</td>
+                <td>{{ event.Semester }}</td>
+            </tr>
+            </br>
+        </tbody>
+        {% endfor %}
+    </table>
+
+    
+
+
+{% endblock %}
