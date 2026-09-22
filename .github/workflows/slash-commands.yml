@@ -1,0 +1,40 @@
+name: CommitRush Slash Commands
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  assign:
+    name: Handle /assign
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.comment.body == '/assign'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Assign issue to commenter
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const username = context.payload.comment.user.login;
+
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              assignees: [username]
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `✅ Issue assigned to @${username}.`
+            });
