@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_groq import ChatGroq
@@ -30,7 +30,9 @@ llm = ChatGroq(
 
 # ---------------- NODE ----------------
 def chat_node(state: ChatState):
-    messages = state["messages"]
+    messages = state.get("messages")
+    if not messages:
+        return {"messages": [AIMessage(content="Warning: Input query is missing or empty.")]}
     response = llm.invoke(messages)
     return {"messages": [response]}
 
@@ -47,6 +49,8 @@ chatbot = graph.compile(checkpointer=checkpointer)
 
 # ---------------- NORMAL RESPONSE ----------------
 def get_ai_response(user_text: str, thread_id: str = "default"):
+    if not user_text or not user_text.strip():
+        return "Warning: Input query is missing or empty."
     result = chatbot.invoke(
         {"messages": [HumanMessage(content=user_text)]},
         config={"configurable": {"thread_id": thread_id}},
@@ -69,6 +73,10 @@ def stream_ai_response(user_text: str, thread_id: str):
     """
     Streaming WITH memory using LangGraph + MongoDB persistence
     """
+    if not user_text or not user_text.strip():
+        yield "Warning: Input query is missing or empty."
+        return
+
     full_response = ""
 
     events = chatbot.stream(
