@@ -12,12 +12,20 @@ from datetime import datetime
 import os
 
 # ---------------- LOAD ENV ----------------
-load_dotenv()
+from dotenv import find_dotenv
+load_dotenv(find_dotenv())
 
 # ---------------- DATABASE ----------------
-mongo_client = MongoClient(os.getenv("MONGO_URI"))
-db = mongo_client["langgraph_chatbot"]
-chat_collection = db["conversations"]
+mongo_uri = os.getenv("MONGO_URI")
+chat_collection = None
+
+if mongo_uri:
+    try:
+        mongo_client = MongoClient(mongo_uri, serverSelectionTimeoutMS=2000)
+        db = mongo_client["langgraph_chatbot"]
+        chat_collection = db["conversations"]
+    except Exception as e:
+        print(f"MongoDB connection warning: {e}")
 
 # ---------------- STATE ----------------
 class ChatState(TypedDict):
@@ -25,7 +33,8 @@ class ChatState(TypedDict):
 
 # ---------------- LLM ----------------
 llm = ChatGroq(
-    model="llama-3.1-8b-instant"
+    model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
+    max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "1024")),
 )
 
 # ---------------- NODE ----------------
@@ -55,12 +64,16 @@ def get_ai_response(user_text: str, thread_id: str = "default"):
     ai_reply = result["messages"][-1].content
 
     # -------- SAVE TO MONGODB --------
-    chat_collection.insert_one({
-        "thread_id": thread_id,
-        "user_message": user_text,
-        "assistant_message": ai_reply,
-        "timestamp": datetime.utcnow()
-    })
+    if chat_collection is not None:
+        try:
+            chat_collection.insert_one({
+                "thread_id": thread_id,
+                "user_message": user_text,
+                "assistant_message": ai_reply,
+                "timestamp": datetime.utcnow()
+            })
+        except Exception as e:
+            print(f"Warning: Failed to save to MongoDB: {e}")
 
     return ai_reply
 
@@ -84,9 +97,13 @@ def stream_ai_response(user_text: str, thread_id: str):
             yield token
 
     # -------- SAVE COMPLETE CHAT TO MONGODB --------
-    chat_collection.insert_one({
-        "thread_id": thread_id,
-        "user_message": user_text,
-        "assistant_message": full_response,
-        "timestamp": datetime.utcnow()
-    })
+    if chat_collection is not None:
+        try:
+            chat_collection.insert_one({
+                "thread_id": thread_id,
+                "user_message": user_text,
+                "assistant_message": full_response,
+                "timestamp": datetime.utcnow()
+            })
+        except Exception as e:
+            print(f"Warning: Failed to save to MongoDB: {e}")
