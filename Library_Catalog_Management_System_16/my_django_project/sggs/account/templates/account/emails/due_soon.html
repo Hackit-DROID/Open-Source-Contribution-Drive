@@ -1,0 +1,8 @@
+{% extends "account/emails/base.html" %}
+
+{% block title %}Due soon: {{ item_title }}{% endblock %}
+
+{% block content %}
+<p>This is a reminder that <strong>{{ item_title }}</strong> is due on <strong>{{ due_date }}</strong>.</p>
+<p>Return or renew it before the due date to avoid a late fine.</p>
+{% endblock %}
