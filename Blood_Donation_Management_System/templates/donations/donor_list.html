@@ -1,18 +1,47 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="d-flex justify-content-between">
+<div class="d-flex justify-content-between align-items-center mb-3">
   <h3>Donors</h3>
   <a class="btn btn-danger" href="{% url 'add_donor' %}">Add Donor</a>
 </div>
-<div class="card p-3 mt-2">
+
+<div class="card p-3 mb-3">
+  <form method="get" action="{% url 'donor_list' %}" class="row g-3 align-items-end">
+    <div class="col-md-5">
+      <label for="recipient_type" class="form-label font-weight-bold">Find Compatible Donors for Recipient:</label>
+      <select name="recipient_type" id="recipient_type" class="form-control form-select">
+        <option value="">-- All Blood Groups (No Filter) --</option>
+        {% for bg in all_blood_groups %}
+          <option value="{{ bg }}" {% if selected_recipient == bg %}selected{% endif %}>Recipient {{ bg }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-danger">Filter Compatible</button>
+      {% if selected_recipient %}
+        <a href="{% url 'donor_list' %}" class="btn btn-outline-secondary">Reset</a>
+      {% endif %}
+    </div>
+  </form>
+  {% if selected_recipient %}
+    <div class="mt-2 text-muted small">
+      Showing donors compatible with recipient <strong>{{ selected_recipient }}</strong>:
+      {% for c in compatible_types %}
+        <span class="badge badge-info bg-info text-white">{{ c }}</span>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<div class="card p-3">
   <table class="table">
     <thead><tr><th>Name</th><th>Group</th><th>Contact</th><th>City</th><th>Actions</th></tr></thead>
     <tbody>
     {% for donor in donors %}
-      <tr><td>{{ donor.name }}</td><td>{{ donor.blood_group }}</td><td>{{ donor.contact }}</td><td>{{ donor.city }}</td>
+      <tr><td>{{ donor.name }}</td><td><span class="badge badge-danger bg-danger text-white">{{ donor.blood_group }}</span></td><td>{{ donor.contact }}</td><td>{{ donor.city }}</td>
       <td><a class="btn btn-sm btn-secondary" href="{% url 'edit_donor' donor.id %}">Edit</a>
           <a class="btn btn-sm btn-danger" href="{% url 'delete_donor' donor.id %}">Delete</a></td></tr>
-    {% empty %}<tr><td colspan="5">No donors</td></tr>{% endfor %}
+    {% empty %}<tr><td colspan="5">No donors found</td></tr>{% endfor %}
     </tbody>
   </table>
 </div>

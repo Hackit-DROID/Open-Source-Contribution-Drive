@@ -2,13 +2,41 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import DonorForm, DonationForm
 from .models import Donor, Donation
+from .compatibility import (
+    COMPATIBLE_DONOR_TYPES,
+    ALL_BLOOD_GROUPS,
+    get_compatible_donor_types,
+    filter_compatible_donors,
+)
+
+
 def is_hospital(user):
     return user.groups.filter(name='Hospital').exists()
 
+
 @login_required
 def donor_list(request):
+    recipient_type = (
+        request.GET.get('recipient_type')
+        or request.GET.get('recipient_blood_group')
+        or request.GET.get('blood_group')
+        or ''
+    ).strip().upper()
+
     donors = Donor.objects.all()
-    return render(request, 'donations/donor_list.html', {'donors': donors})
+    compatible_types = []
+
+    if recipient_type:
+        compatible_types = get_compatible_donor_types(recipient_type)
+        donors = filter_compatible_donors(donors, recipient_type)
+
+    context = {
+        'donors': donors,
+        'selected_recipient': recipient_type,
+        'compatible_types': compatible_types,
+        'all_blood_groups': ALL_BLOOD_GROUPS,
+    }
+    return render(request, 'donations/donor_list.html', context)
 
 @login_required
 @user_passes_test(is_hospital)

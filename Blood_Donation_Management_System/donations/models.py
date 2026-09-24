@@ -1,5 +1,4 @@
 from django.db import models
-from donations.validators import positive_units if False else None
 from accounts.models import HospitalProfile
 from inventory.models import BloodStock
 
