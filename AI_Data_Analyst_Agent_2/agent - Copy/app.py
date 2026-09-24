@@ -4,6 +4,7 @@ import pandas as pd
 from utils.llm import generate_pandas_code, explain_result
 from utils.charts import generate_charts
 from utils.data import apply_filters
+from utils.safe_exec import execute_safe_code, SecurityViolationError, CodeTimeoutError, sanitize_code
 
 app = Flask(__name__)
 
@@ -75,28 +76,51 @@ def filter_data():
 def query():
     global df_global
 
-    question = request.json["question"]
+    if df_global is None:
+        return jsonify({
+            "error": "No dataset uploaded yet. Please upload a dataset first.",
+            "status": "error"
+        }), 400
+
+    payload = request.get_json(silent=True) or {}
+    question = payload.get("question", "")
+    if not question:
+        return jsonify({
+            "error": "No question provided.",
+            "status": "error"
+        }), 400
 
     code = generate_pandas_code(question, df_global.columns)
 
     try:
-        # 🔥 SAFE EXECUTION
-        local_vars = {"df": df_global}
-        exec(f"result = {code}", {}, local_vars)
-        result = local_vars["result"]
-
+        # Secure sandbox execution with AST inspection and timeout bounds
+        result = execute_safe_code(code, df_global)
+    except SecurityViolationError as e:
+        return jsonify({
+            "error": f"Security violation detected: {str(e)}",
+            "status": "blocked",
+            "code": code
+        }), 400
+    except (CodeTimeoutError, TimeoutError) as e:
+        return jsonify({
+            "error": f"Execution timeout: {str(e)}",
+            "status": "timeout",
+            "code": code
+        }), 408
     except Exception as e:
         return jsonify({
             "error": f"Execution error: {str(e)}",
+            "status": "error",
             "code": code
-        })
+        }), 400
 
     explanation = explain_result(question, result)
 
     return jsonify({
         "result": str(result),
         "explanation": explanation,
-        "code": code   # debug
+        "code": code,
+        "status": "success"
     })
 
 if __name__ == "__main__":

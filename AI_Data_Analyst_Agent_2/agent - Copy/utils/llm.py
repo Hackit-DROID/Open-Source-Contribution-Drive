@@ -5,7 +5,7 @@ from prompts.prompts import QUERY_PROMPT, EXPLAIN_PROMPT
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY") or "gsk_placeholder")
 
 def generate_report(df):
     prompt = f"""
