@@ -85,10 +85,9 @@
         
         <select name="branch" style="padding:5px; width:150px;">
             <option value="">All Branches</option>
-            <option value="CSE" {% if request.GET.branch == "CSE" %}selected{% endif %}>CSE</option>
-            <option value="IT" {% if request.GET.branch == "IT" %}selected{% endif %}>IT</option>
-            <option value="ECE" {% if request.GET.branch == "ECE" %}selected{% endif %}>ECE</option>
-            <option value="EEE" {% if request.GET.branch == "EEE" %}selected{% endif %}>EEE</option>
+            {% for branch in branches %}
+            <option value="{{ branch }}" {% if request.GET.branch == branch %}selected{% endif %}>{{ branch }}</option>
+            {% endfor %}
         </select>
 
         <button type="submit" style="padding:5px 10px; background:#1780f0; color:white; border:none; cursor:pointer;">Search</button>
