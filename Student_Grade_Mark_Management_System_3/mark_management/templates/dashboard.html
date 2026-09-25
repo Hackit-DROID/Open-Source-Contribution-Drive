@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Dashboard</h1>
+    <p>Overview of all students, marks, and performance statistics</p>
+</div>
+
+<!-- ═══ Stats ═══ -->
+<div class="stats-grid animate-in">
+    <div class="stat-card">
+        <div class="stat-icon purple">🧑‍🎓</div>
+        <div class="stat-info">
+            <h3>{{ stats.total_students }}</h3>
+            <p>Total Students</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+            <h3>{{ stats.with_marks }}</h3>
+            <p>With Marks</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon amber">⏳</div>
+        <div class="stat-info">
+            <h3>{{ stats.without_marks }}</h3>
+            <p>Marks Pending</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue">📈</div>
+        <div class="stat-info">
+            <h3>{{ "%.1f"|format(stats.avg_percentage) }}%</h3>
+            <p>Average Score</p>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- ═══ Branch-wise Distribution ═══ -->
+    <div class="card animate-in">
+        <div class="card-title">🏫 Branch-wise Students</div>
+        {% if stats.branch_counts %}
+            {% for branch, count in stats.branch_counts.items() %}
+            <div style="margin-bottom: 0.8rem;">
+                <div class="d-flex justify-between align-center mb-1">
+                    <span style="font-size: 0.85rem; color: var(--text-bright);">{{ branch }}</span>
+                    <span class="badge badge-primary">{{ count }}</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar excellent" style="width: {{ (count / stats.total_students * 100) if stats.total_students > 0 else 0 }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted);">No students added yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- ═══ Year-wise Distribution ═══ -->
+    <div class="card animate-in">
+        <div class="card-title">📅 Year-wise Students</div>
+        {% if stats.year_counts %}
+            {% for year, count in stats.year_counts.items() %}
+            <div style="margin-bottom: 0.8rem;">
+                <div class="d-flex justify-between align-center mb-1">
+                    <span style="font-size: 0.85rem; color: var(--text-bright);">{{ year }}</span>
+                    <span class="badge badge-success">{{ count }}</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar good" style="width: {{ (count / stats.total_students * 100) if stats.total_students > 0 else 0 }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-muted);">No students added yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══ Top Performers ═══ -->
+{% if stats.top_performers %}
+<div class="card mt-3 animate-in">
+    <div class="card-title">🏆 Top Performers</div>
+    <div class="card-subtitle">Students with highest overall percentage</div>
+
+    <div class="table-container mt-2">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>Year</th>
+                    <th>Total</th>
+                    <th>Percentage</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for perf in stats.top_performers %}
+                <tr>
+                    <td>
+                        {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+                    </td>
+                    <td><strong style="color: var(--text-bright);">{{ perf.name }}</strong></td>
+                    <td><span class="badge badge-info">{{ perf.branch }}</span></td>
+                    <td>{{ perf.year }}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace;">{{ perf.total }}/500</td>
+                    <td>
+                        <strong style="color: {% if perf.percentage >= 80 %}var(--success){% elif perf.percentage >= 60 %}var(--info){% else %}var(--warning){% endif %};">
+                            {{ "%.1f"|format(perf.percentage) }}%
+                        </strong>
+                    </td>
+                    <td><a href="{{ url_for('report', student_id=perf.id) }}" class="btn btn-primary btn-sm">📄 Report</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══ Subject Average ═══ -->
+{% if stats.subject_avg %}
+<div class="card mt-3 animate-in">
+    <div class="card-title">📘 Subject-wise Average Marks</div>
+    <div class="card-subtitle">Average marks across all students per subject</div>
+
+    {% for subject, avg in stats.subject_avg.items() %}
+    <div style="margin-bottom: 1rem; margin-top: 0.5rem;">
+        <div class="d-flex justify-between align-center mb-1">
+            <span style="font-weight: 600; color: var(--text-bright);">{{ subject }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);">{{ "%.1f"|format(avg) }}/100</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar {% if avg >= 80 %}excellent{% elif avg >= 60 %}good{% elif avg >= 40 %}average{% else %}poor{% endif %}"
+                 style="width: {{ avg }}%;">
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

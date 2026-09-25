@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Profile - SGGS Library{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Profile</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Role:</strong> {{ user.get_role_display }}</p>
+    {% if user.email %}<p><strong>Email:</strong> {{ user.email }}</p>{% endif %}
+    {% if user.roll_number %}<p><strong>Roll Number:</strong> {{ user.roll_number }}</p>{% endif %}
+    {% if user.phone %}<p><strong>Phone:</strong> {{ user.phone }}</p>{% endif %}
+</div>
+
+{% if user.is_student %}
+<div class="card">
+    <h3>Currently Issued ({{ active_issues|length }})</h3>
+    {% if active_issues %}
+        <table>
+            <tr><th>Book</th><th>Issued</th><th>Due</th><th></th></tr>
+            {% for r in active_issues %}
+                <tr>
+                    <td><a href="{% url 'books:detail' r.book.pk %}">{{ r.book.title }}</a></td>
+                    <td>{{ r.issue_date|date:"M d, Y" }}</td>
+                    <td>{{ r.due_date|date:"M d, Y" }}{% if r.is_overdue %} <span class="unavailable">(overdue)</span>{% endif %}</td>
+                    <td>
+                        <form method="post" action="{% url 'transactions:return' r.pk %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Return</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>You have no books currently issued.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>AI Recommendations for You</h3>
+    {% if recommendations %}
+        <div class="book-grid">
+            {% for book in recommendations %}
+                <div class="book-card card">
+                    <h3><a href="{% url 'books:detail' book.pk %}">{{ book.title }}</a></h3>
+                    <div class="meta">by {{ book.author }}</div>
+                    {% if book.ai_summary %}<p>{{ book.ai_summary }}</p>{% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Issue a few books first to get personalized recommendations.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Reading History</h3>
+    {% if history %}
+        <table>
+            <tr><th>Book</th><th>Returned</th><th>Fine (Rs.)</th></tr>
+            {% for r in history %}
+                <tr>
+                    <td>{{ r.book.title }}</td>
+                    <td>{{ r.return_date|date:"M d, Y" }}</td>
+                    <td>{{ r.fine }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No reading history yet.</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

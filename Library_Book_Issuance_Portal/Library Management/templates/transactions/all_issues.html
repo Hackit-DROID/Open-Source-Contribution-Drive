@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}All Issues - SGGS Library{% endblock %}
+{% block content %}
+<h2>All Issue Records</h2>
+
+<form method="get" class="filter-form card">
+    <div>
+        <label for="status">Status</label>
+        <select id="status" name="status">
+            <option value="">All</option>
+            <option value="issued" {% if selected_status == "issued" %}selected{% endif %}>Issued</option>
+            <option value="returned" {% if selected_status == "returned" %}selected{% endif %}>Returned</option>
+        </select>
+    </div>
+    <div><button type="submit" class="btn">Filter</button></div>
+</form>
+
+{% if records %}
+<table>
+    <tr>
+        <th>Book</th><th>Student</th><th>Issue Date</th>
+        <th>Due Date</th><th>Return Date</th><th>Status</th><th>Fine (Rs.)</th>
+    </tr>
+    {% for r in records %}
+        <tr>
+            <td>{{ r.book.title }}</td>
+            <td>{{ r.student.username }}</td>
+            <td>{{ r.issue_date|date:"M d, Y" }}</td>
+            <td>{{ r.due_date|date:"M d, Y" }}</td>
+            <td>{% if r.return_date %}{{ r.return_date|date:"M d, Y" }}{% else %}-{% endif %}</td>
+            <td>{{ r.get_status_display }}{% if r.is_overdue %} (overdue){% endif %}</td>
+            <td>{{ r.fine }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No records to show.</p>
+{% endif %}
+{% endblock %}

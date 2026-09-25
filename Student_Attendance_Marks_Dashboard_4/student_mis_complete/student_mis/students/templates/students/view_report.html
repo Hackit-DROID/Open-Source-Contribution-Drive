@@ -1,0 +1,237 @@
+{% extends 'students/base.html' %}
+
+{% block title %}Student Report - Student MIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 px-0 sidebar">
+            <nav class="nav flex-column py-3">
+                <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a class="nav-link active" href="{% url 'student_list' %}">
+                    <i class="fas fa-users"></i> All Students
+                </a>
+                <a class="nav-link" href="{% url 'add_student' %}">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-alt"></i> Student Report Card</h2>
+                <button class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+            </div>
+
+            <!-- Student Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Student Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Name:</th>
+                                    <td><strong>{{ student.name }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Register Number:</th>
+                                    <td><strong>{{ student.reg_no }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ student.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Mobile:</th>
+                                    <td>{{ student.mobile }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Branch:</th>
+                                    <td><span class="badge bg-info">{{ student.get_branch_display }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Year:</th>
+                                    <td>{{ student.get_year_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Gender:</th>
+                                    <td>{{ student.get_gender_display }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marks Card -->
+            {% if marks %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Academic Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Subject</th>
+                                    <th class="text-center">ISE-1<br>(20%)</th>
+                                    <th class="text-center">Midterm<br>(20%)</th>
+                                    <th class="text-center">End-Term<br>(60%)</th>
+                                    <th class="text-center">Total<br>(100)</th>
+                                    <th class="text-center">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>{{ marks.subject1_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject1_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject1_mid }}</td>
+                                    <td class="text-center">{{ marks.subject1_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject1|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject1|floatformat:2 }}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject2_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject2_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject2_mid }}</td>
+                                    <td class="text-center">{{ marks.subject2_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject2|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject2|floatformat:2 }}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject3_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject3_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject3_mid }}</td>
+                                    <td class="text-center">{{ marks.subject3_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject3|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject3|floatformat:2 }}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject4_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject4_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject4_mid }}</td>
+                                    <td class="text-center">{{ marks.subject4_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject4|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject4|floatformat:2 }}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject5_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject5_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject5_mid }}</td>
+                                    <td class="text-center">{{ marks.subject5_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject5|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject5|floatformat:2 }}%</td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="table-success">
+                                <tr>
+                                    <th colspan="4" class="text-end">Overall Percentage:</th>
+                                    <th colspan="2" class="text-center">
+                                        <h4 class="mb-0">{{ overall_percentage|floatformat:2 }}%</h4>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> No marks have been added for this student yet.
+                <a href="{% url 'add_marks' student.reg_no %}" class="alert-link">Add marks now</a>
+            </div>
+            {% endif %}
+
+            <!-- Attendance Card -->
+            {% if attendance %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Attendance Record</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h3 class="text-primary">{{ attendance.total_classes }}</h3>
+                            <p class="text-muted">Total Classes</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="text-success">{{ attendance.classes_attended }}</h3>
+                            <p class="text-muted">Classes Attended</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="{% if attendance.attendance_percentage >= 75 %}text-success{% else %}text-danger{% endif %}">
+                                {{ attendance.attendance_percentage|floatformat:2 }}%
+                            </h3>
+                            <p class="text-muted">Attendance Percentage</p>
+                        </div>
+                    </div>
+                    
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar {% if attendance.attendance_percentage >= 75 %}bg-success{% else %}bg-danger{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ attendance.attendance_percentage }}%">
+                            {{ attendance.attendance_percentage|floatformat:2 }}%
+                        </div>
+                    </div>
+
+                    {% if attendance.attendance_percentage < 75 %}
+                    <div class="alert alert-danger mt-3 mb-0">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Warning:</strong> Attendance is below 75% minimum requirement.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success mt-3 mb-0">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Good:</strong> Attendance meets the minimum requirement.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> No attendance record found for this student.
+                <a href="{% url 'add_attendance' student.reg_no %}" class="alert-link">Add attendance now</a>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 mb-4">
+                <a href="{% url 'student_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                <a href="{% url 'add_marks' student.reg_no %}" class="btn btn-success">
+                    <i class="fas fa-edit"></i> Update Marks
+                </a>
+                <a href="{% url 'add_attendance' student.reg_no %}" class="btn btn-info">
+                    <i class="fas fa-calendar-check"></i> Update Attendance
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .sidebar, .btn, .navbar {
+            display: none !important;
+        }
+        .col-md-9, .col-lg-10 {
+            max-width: 100% !important;
+        }
+    }
+</style>
+{% endblock %}

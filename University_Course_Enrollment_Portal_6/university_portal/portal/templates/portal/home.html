@@ -1,0 +1,70 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Home - University Portal{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <h1 class="display-4 text-primary">🎓 University Portal</h1>
+    <p class="lead">Complete university management system with comprehensive database integration</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-people"></i> People</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'instructors_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person-badge"></i> All Instructors & Courses
+                    </a>
+                    <a href="{% url 'students_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-mortarboard"></i> All Students
+                    </a>
+                    <a href="{% url 'search' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-search"></i> Universal Search
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-book"></i> Academics</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'courses_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-book"></i> All Courses
+                    </a>
+                    <a href="{% url 'sections_timetable' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-calendar3"></i> Section Timetable
+                    </a>
+                    <a href="{% url 'departments_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-building"></i> Departments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-building"></i> Infrastructure</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'classrooms_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-door-open"></i> All Classrooms
+                    </a>
+                    <a href="{% url 'departments_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-geo-alt"></i> Department Buildings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

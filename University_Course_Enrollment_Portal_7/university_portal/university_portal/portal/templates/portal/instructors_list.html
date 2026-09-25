@@ -1,0 +1,84 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}All Instructors - University Portal{% endblock %}
+
+{% block content %}
+<div class="card-header-custom mb-3">
+  <div class="d-flex align-items-center gap-3">
+    <h1 class="card-title d-flex align-items-center text-dark mb-0">
+      <i class="bi bi-person-badge me-2 text-primary"></i> All Instructors &amp; Their Courses
+    </h1>
+    <span class="badge bg-gradient text-white shadow-sm px-3 py-2"
+          style="background: linear-gradient(90deg, #2c3e50, #5bc0be); font-size: 0.9rem;">
+      {{ instructors_courses|length }} instructors
+    </span>
+  </div>
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="muted">
+      View instructor assignments and the courses they teach. Click a course (if linked) for details.
+    </div>
+    <a href="{% url 'add_instructor' %}" class="btn btn-primary">+ Add Instructor</a>
+  </div>
+</div>
+
+<div class="table-responsive rounded-lg shadow-soft">
+  <table class="table align-middle table-striped table-hover mb-0">
+    <thead>
+      <tr class="text-uppercase small text-muted">
+        <th><i class="bi bi-person me-1"></i> Instructor Name</th>
+        <th><i class="bi bi-building me-1"></i> Department</th>
+        <th><i class="bi bi-book me-1"></i> Courses Taught</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in instructors_courses %}
+      <tr class="bg-white">
+        <td>
+          <strong class="text-dark">{{ item.instructor.name }}</strong>
+          {% if item.instructor.title %}
+            <div class="muted small">{{ item.instructor.title }}</div>
+          {% endif %}
+        </td>
+
+        <td>
+          <span class="badge rounded-pill text-bg-info text-dark px-3 py-2 fw-semibold">
+            {{ item.instructor.dept_name }}
+          </span>
+        </td>
+
+        <td>
+          {% if item.courses %}
+            {% for course in item.courses %}
+              {# If course is a string use it directly; if it's an object you can link to detail view. #}
+              {% if course.url %}
+                <a href="{{ course.url }}" class="badge rounded-pill text-bg-success text-white me-1 py-2 px-3" title="{{ course.title|default:course }}">
+                  {{ course.title|default:course }}
+                </a>
+              {% else %}
+                <span class="badge rounded-pill bg-success text-white me-1 py-2 px-3">
+                  {{ course }}
+                </span>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <span class="text-muted">No courses assigned</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'delete_instructor' item.instructor.ID %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this instructor?')">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center py-4">
+          <div class="text-muted">
+            <i class="bi bi-exclamation-circle me-1"></i> No instructors found.
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "account/emails/base.html" %}
+
+{% block title %}Overdue: {{ item_title }}{% endblock %}
+
+{% block content %}
+<p>The item <strong>{{ item_title }}</strong> was due on <strong>{{ due_date }}</strong>{% if days_overdue %} and is now <strong>{{ days_overdue }} day{{ days_overdue|pluralize }}</strong> overdue{% endif %}.</p>
+{% if fine_amount %}
+<p>An outstanding fine of <strong>{{ fine_amount }}</strong> has been applied to your account.</p>
+{% endif %}
+<p>Please return or renew it as soon as possible.</p>
+{% endblock %}

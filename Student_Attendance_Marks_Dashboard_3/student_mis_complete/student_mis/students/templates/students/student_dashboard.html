@@ -1,0 +1,392 @@
+{% extends 'students/base.html' %}
+
+{% block title %}Student Dashboard - Student MIS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-user-graduate"></i> Student Dashboard</h2>
+                <button class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+            </div>
+
+            <!-- Welcome Card -->
+            <div class="card mb-4 bg-gradient" style="background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%); color: white;">
+                <div class="card-body p-4">
+                    <h3 class="mb-2">Welcome, {{ student.name }}! 👋</h3>
+                    <p class="mb-0">Register Number: <strong>{{ student.reg_no }}</strong></p>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-id-card"></i> Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Name:</th>
+                                    <td>{{ student.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Register Number:</th>
+                                    <td><strong>{{ student.reg_no }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ student.email }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Branch:</th>
+                                    <td><span class="badge bg-info">{{ student.get_branch_display }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Year:</th>
+                                    <td>{{ student.get_year_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Mobile:</th>
+                                    <td>{{ student.mobile }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card success h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                            <h3 class="mb-2">
+                                {% if marks %}
+                                    {{ overall_percentage|floatformat:2 }}%
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </h3>
+                            <p class="text-muted mb-0">Overall Percentage</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card primary h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-calendar-check fa-3x text-primary mb-3"></i>
+                            <h3 class="mb-2">
+                                {% if attendance %}
+                                    {{ attendance.attendance_percentage|floatformat:2 }}%
+                                {% else %}
+                                    --
+                                {% endif %}
+                            </h3>
+                            <p class="text-muted mb-0">Attendance</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card warning h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-book fa-3x text-warning mb-3"></i>
+                            <h3 class="mb-2">5</h3>
+                            <p class="text-muted mb-0">Total Subjects</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Performance -->
+            {% if marks %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Academic Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Subject</th>
+                                    <th class="text-center">ISE-1<br><small>(20%)</small></th>
+                                    <th class="text-center">Midterm<br><small>(20%)</small></th>
+                                    <th class="text-center">End-Term<br><small>(60%)</small></th>
+                                    <th class="text-center">Total<br><small>(100)</small></th>
+                                    <th class="text-center">Percentage</th>
+                                    <th class="text-center">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>{{ marks.subject1_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject1_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject1_mid }}</td>
+                                    <td class="text-center">{{ marks.subject1_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject1|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject1|floatformat:2 }}%</td>
+                                    <td class="text-center">
+                                        {% with percentage=subject_totals.subject1 %}
+                                            {% if percentage >= 90 %}
+                                                <span class="badge bg-success">A+</span>
+                                            {% elif percentage >= 80 %}
+                                                <span class="badge bg-success">A</span>
+                                            {% elif percentage >= 70 %}
+                                                <span class="badge bg-info">B+</span>
+                                            {% elif percentage >= 60 %}
+                                                <span class="badge bg-info">B</span>
+                                            {% elif percentage >= 50 %}
+                                                <span class="badge bg-warning">C</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">F</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject2_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject2_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject2_mid }}</td>
+                                    <td class="text-center">{{ marks.subject2_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject2|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject2|floatformat:2 }}%</td>
+                                    <td class="text-center">
+                                        {% with percentage=subject_totals.subject2 %}
+                                            {% if percentage >= 90 %}
+                                                <span class="badge bg-success">A+</span>
+                                            {% elif percentage >= 80 %}
+                                                <span class="badge bg-success">A</span>
+                                            {% elif percentage >= 70 %}
+                                                <span class="badge bg-info">B+</span>
+                                            {% elif percentage >= 60 %}
+                                                <span class="badge bg-info">B</span>
+                                            {% elif percentage >= 50 %}
+                                                <span class="badge bg-warning">C</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">F</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject3_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject3_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject3_mid }}</td>
+                                    <td class="text-center">{{ marks.subject3_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject3|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject3|floatformat:2 }}%</td>
+                                    <td class="text-center">
+                                        {% with percentage=subject_totals.subject3 %}
+                                            {% if percentage >= 90 %}
+                                                <span class="badge bg-success">A+</span>
+                                            {% elif percentage >= 80 %}
+                                                <span class="badge bg-success">A</span>
+                                            {% elif percentage >= 70 %}
+                                                <span class="badge bg-info">B+</span>
+                                            {% elif percentage >= 60 %}
+                                                <span class="badge bg-info">B</span>
+                                            {% elif percentage >= 50 %}
+                                                <span class="badge bg-warning">C</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">F</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject4_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject4_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject4_mid }}</td>
+                                    <td class="text-center">{{ marks.subject4_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject4|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject4|floatformat:2 }}%</td>
+                                    <td class="text-center">
+                                        {% with percentage=subject_totals.subject4 %}
+                                            {% if percentage >= 90 %}
+                                                <span class="badge bg-success">A+</span>
+                                            {% elif percentage >= 80 %}
+                                                <span class="badge bg-success">A</span>
+                                            {% elif percentage >= 70 %}
+                                                <span class="badge bg-info">B+</span>
+                                            {% elif percentage >= 60 %}
+                                                <span class="badge bg-info">B</span>
+                                            {% elif percentage >= 50 %}
+                                                <span class="badge bg-warning">C</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">F</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>{{ marks.subject5_name }}</strong></td>
+                                    <td class="text-center">{{ marks.subject5_ise1 }}</td>
+                                    <td class="text-center">{{ marks.subject5_mid }}</td>
+                                    <td class="text-center">{{ marks.subject5_end }}</td>
+                                    <td class="text-center"><strong>{{ subject_totals.subject5|floatformat:2 }}</strong></td>
+                                    <td class="text-center">{{ subject_totals.subject5|floatformat:2 }}%</td>
+                                    <td class="text-center">
+                                        {% with percentage=subject_totals.subject5 %}
+                                            {% if percentage >= 90 %}
+                                                <span class="badge bg-success">A+</span>
+                                            {% elif percentage >= 80 %}
+                                                <span class="badge bg-success">A</span>
+                                            {% elif percentage >= 70 %}
+                                                <span class="badge bg-info">B+</span>
+                                            {% elif percentage >= 60 %}
+                                                <span class="badge bg-info">B</span>
+                                            {% elif percentage >= 50 %}
+                                                <span class="badge bg-warning">C</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">F</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="table-success">
+                                <tr>
+                                    <th colspan="5" class="text-end">Overall Percentage:</th>
+                                    <th colspan="2" class="text-center">
+                                        <h5 class="mb-0">{{ overall_percentage|floatformat:2 }}%</h5>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Performance Chart (Simple Visual) -->
+                    <div class="mt-4">
+                        <h6>Subject-wise Performance</h6>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label class="form-label small">{{ marks.subject1_name }}</label>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-primary" style="width: {{ subject_totals.subject1 }}%">
+                                        {{ subject_totals.subject1|floatformat:2 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small">{{ marks.subject2_name }}</label>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-success" style="width: {{ subject_totals.subject2 }}%">
+                                        {{ subject_totals.subject2|floatformat:2 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small">{{ marks.subject3_name }}</label>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-info" style="width: {{ subject_totals.subject3 }}%">
+                                        {{ subject_totals.subject3|floatformat:2 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small">{{ marks.subject4_name }}</label>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-warning" style="width: {{ subject_totals.subject4 }}%">
+                                        {{ subject_totals.subject4|floatformat:2 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small">{{ marks.subject5_name }}</label>
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar bg-danger" style="width: {{ subject_totals.subject5 }}%">
+                                        {{ subject_totals.subject5|floatformat:2 }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <strong>No marks available yet.</strong> Please contact your teacher to add your marks.
+            </div>
+            {% endif %}
+
+            <!-- Attendance Details -->
+            {% if attendance %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Attendance Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-primary mb-2">{{ attendance.total_classes }}</h3>
+                                <p class="text-muted mb-0">Total Classes</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <h3 class="text-success mb-2">{{ attendance.classes_attended }}</h3>
+                                <p class="text-muted mb-0">Classes Attended</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <h3 class="{% if attendance.attendance_percentage >= 75 %}text-success{% else %}text-danger{% endif %} mb-2">
+                                    {{ attendance.attendance_percentage|floatformat:2 }}%
+                                </h3>
+                                <p class="text-muted mb-0">Attendance %</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress mb-3" style="height: 35px;">
+                        <div class="progress-bar {% if attendance.attendance_percentage >= 75 %}bg-success{% else %}bg-danger{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ attendance.attendance_percentage }}%">
+                            <strong>{{ attendance.attendance_percentage|floatformat:2 }}%</strong>
+                        </div>
+                    </div>
+
+                    {% if attendance.attendance_percentage < 75 %}
+                    <div class="alert alert-danger mb-0">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Warning:</strong> Your attendance is below the 75% minimum requirement. 
+                        Please attend classes regularly to improve your attendance.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success mb-0">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Excellent!</strong> Your attendance meets the minimum requirement. Keep it up!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <strong>No attendance record available.</strong>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .btn, .navbar {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}

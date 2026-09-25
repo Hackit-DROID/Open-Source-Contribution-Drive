@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}AI Search - SGGS Library{% endblock %}
+{% block content %}
+<h2>Natural-Language Book Search</h2>
+<p>Describe what you're looking for in plain words, e.g. <em>"easy books for learning Python"</em> or
+   <em>"introductory electronics for first-year students"</em>.</p>
+
+<form method="get" class="search-form card">
+    <div style="flex: 1;">
+        <input type="text" name="q" value="{{ query }}" placeholder="What are you looking for?" autofocus>
+    </div>
+    <button type="submit" class="btn">Search with AI</button>
+</form>
+
+{% if ai_error %}
+    <p class="msg msg-warning">AI search unavailable ({{ ai_error }}). Showing keyword results instead.</p>
+{% endif %}
+
+{% if query %}
+    <h3>Results for "{{ query }}"</h3>
+    {% if results %}
+        <div class="book-grid">
+            {% for book in results %}
+                <div class="book-card card">
+                    <h3><a href="{% url 'books:detail' book.pk %}">{{ book.title }}</a></h3>
+                    <div class="meta">by {{ book.author }}</div>
+                    {% if book.ai_summary %}<p>{{ book.ai_summary }}</p>{% endif %}
+                    {% if book.tag_list %}
+                        <div class="tags">
+                            {% for tag in book.tag_list %}<span class="tag">{{ tag }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No matching books found.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

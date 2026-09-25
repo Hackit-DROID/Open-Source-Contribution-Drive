@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Class Toppers</title>
+      <style>
+        /* General Page Styling */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f9fafc;
+    color: #333;
+}
+
+/* Heading */
+h1 {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 28px;
+    color: #2c3e50;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Table Styling */
+table {
+    border-collapse: collapse;
+    width: 80%;
+    margin: 20px auto;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    font-size: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Header Row */
+th {
+    background: #1abc9c;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Zebra Stripe Rows */
+tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+/* Hover Effect */
+tr:hover {
+    background: #eafaf7;
+    transition: 0.3s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    table {
+        width: 95%;
+        font-size: 13px;
+    }
+    th, td {
+        padding: 8px;
+    }
+    h1 {
+        font-size: 22px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <h1>Class and Subject Toppers</h1>
+
+    <h2>Subject Toppers</h2>
+    <table>
+        <tr><th>Subject</th><th>Topper</th><th>Marks</th></tr>
+        <tr><td>Math</td><td>{{ math_topper.student_name }}</td><td>{{ math_topper.math }}</td></tr>
+        <tr><td>Physics</td><td>{{ phy_topper.student_name }}</td><td>{{ phy_topper.phy }}</td></tr>
+        <tr><td>Chemistry</td><td>{{ chem_topper.student_name }}</td><td>{{ chem_topper.chem }}</td></tr>
+    </table>
+
+    <h2>Class Topper</h2>
+    <p style="text-align:center;">
+        {{ class_topper.student_name }} (Reg No: {{ class_topper.reg_no }})  
+        with average marks: 
+        {{ class_topper.math|add:class_topper.phy|add:class_topper.chem|divisibleby:3 }}
+    </p>
+
+    <h2>Class Subject Averages</h2>
+    <table>
+        <tr><th>Subject</th><th>Average Marks</th></tr>
+        <tr><td>Math</td><td>{{ subject_averages.avg_math|floatformat:2 }}</td></tr>
+        <tr><td>Physics</td><td>{{ subject_averages.avg_phy|floatformat:2 }}</td></tr>
+        <tr><td>Chemistry</td><td>{{ subject_averages.avg_chem|floatformat:2 }}</td></tr>
+    </table>
+</body>
+</html>

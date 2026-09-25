@@ -1,0 +1,86 @@
+{% extends 'students/base.html' %}
+
+{% block title %}Home - Student MIS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row min-vh-100 align-items-center">
+        <div class="col-lg-10 mx-auto">
+            <div class="text-center mb-5">
+                <i class="fas fa-graduation-cap" style="font-size: 5rem; color: var(--primary-color);"></i>
+                <h1 class="display-4 fw-bold mt-3">Student Management Information System</h1>
+                <p class="lead text-muted">Manage students, marks, and attendance efficiently</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Admin Login Card -->
+                <div class="col-md-6">
+                    <div class="card h-100 text-center">
+                        <div class="card-body p-5">
+                            <div class="mb-4">
+                                <i class="fas fa-user-shield" style="font-size: 4rem; color: var(--primary-color);"></i>
+                            </div>
+                            <h3 class="card-title mb-3">Admin / Teacher</h3>
+                            <p class="card-text text-muted mb-4">
+                                Manage student records, add marks, update attendance, and generate reports.
+                            </p>
+                            <a href="{% url 'admin_login' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Admin Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Login Card -->
+                <div class="col-md-6">
+                    <div class="card h-100 text-center">
+                        <div class="card-body p-5">
+                            <div class="mb-4">
+                                <i class="fas fa-user-graduate" style="font-size: 4rem; color: var(--success-color);"></i>
+                            </div>
+                            <h3 class="card-title mb-3">Student</h3>
+                            <p class="card-text text-muted mb-4">
+                                View your personal details, marks, attendance, and performance reports.
+                            </p>
+                            <a href="{% url 'student_login' %}" class="btn btn-success btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Student Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="row mt-5 g-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-users-cog" style="font-size: 2.5rem; color: var(--info-color);"></i>
+                            <h5 class="mt-3">Student Management</h5>
+                            <p class="text-muted small">Add, edit, and manage student records efficiently</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-chart-line" style="font-size: 2.5rem; color: var(--warning-color);"></i>
+                            <h5 class="mt-3">Marks & Performance</h5>
+                            <p class="text-muted small">Track marks with ISE, Mid, and End-term weightage</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-check" style="font-size: 2.5rem; color: var(--success-color);"></i>
+                            <h5 class="mt-3">Attendance Tracking</h5>
+                            <p class="text-muted small">Monitor and update student attendance records</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

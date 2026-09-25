@@ -1,0 +1,110 @@
+{% extends 'students/base.html' %}
+
+{% block title %}Edit Student - Student MIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 px-0 sidebar">
+            <nav class="nav flex-column py-3">
+                <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a class="nav-link active" href="{% url 'student_list' %}">
+                    <i class="fas fa-users"></i> All Students
+                </a>
+                <a class="nav-link" href="{% url 'add_student' %}">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 px-4 py-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-edit"></i> Edit Student Details</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form method="POST">
+                                {% csrf_token %}
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="name" name="name" 
+                                               value="{{ student.name }}" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="reg_no" class="form-label">Register Number</label>
+                                        <input type="text" class="form-control" id="reg_no" 
+                                               value="{{ student.reg_no }}" disabled>
+                                        <small class="text-muted">Register number cannot be changed</small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               value="{{ student.email }}" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="mobile" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                                        <input type="tel" class="form-control" id="mobile" name="mobile" 
+                                               value="{{ student.mobile }}" required>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="branch" class="form-label">Branch <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="branch" name="branch" required>
+                                            <option value="CSE" {% if student.branch == 'CSE' %}selected{% endif %}>Computer Science Engineering</option>
+                                            <option value="ECE" {% if student.branch == 'ECE' %}selected{% endif %}>Electronics and Communication</option>
+                                            <option value="ME" {% if student.branch == 'ME' %}selected{% endif %}>Mechanical Engineering</option>
+                                            <option value="EE" {% if student.branch == 'EE' %}selected{% endif %}>Electrical Engineering</option>
+                                            <option value="CE" {% if student.branch == 'CE' %}selected{% endif %}>Civil Engineering</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="year" class="form-label">Year <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="year" name="year" required>
+                                            <option value="1" {% if student.year == 1 %}selected{% endif %}>First Year</option>
+                                            <option value="2" {% if student.year == 2 %}selected{% endif %}>Second Year</option>
+                                            <option value="3" {% if student.year == 3 %}selected{% endif %}>Third Year</option>
+                                            <option value="4" {% if student.year == 4 %}selected{% endif %}>Fourth Year</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="gender" name="gender" required>
+                                            <option value="M" {% if student.gender == 'M' %}selected{% endif %}>Male</option>
+                                            <option value="F" {% if student.gender == 'F' %}selected{% endif %}>Female</option>
+                                            <option value="O" {% if student.gender == 'O' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Update Student
+                                    </button>
+                                    <a href="{% url 'student_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

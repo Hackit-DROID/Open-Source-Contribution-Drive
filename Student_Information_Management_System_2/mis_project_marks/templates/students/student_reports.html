@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Reports</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+        }
+
+        nav {
+            background: #1780f0;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 25px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        nav a:hover { color: #ffd700; }
+
+        h1, h2 { text-align: center; color: #1780f0; margin: 20px 0 10px 0; }
+
+        .table-container {
+            width: 95%;
+            overflow-x: auto;
+            margin: auto;
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px 15px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        th {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            font-size: 16px;
+        }
+        tr:nth-child(even) td { background: #f9f9f9; }
+        tr:hover td { background: #f0f8ff; }
+
+        .footer-row {
+            font-weight: bold;
+            background: #d9f2d9 !important;
+        }
+
+        .sub-table-container {
+            width: 50%;
+            margin: 30px auto;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'all_students' %}">All Students</a>
+        <a href="{% url 'toppers' %}">Toppers</a>
+        <a href="{% url 'student_reports' %}">Student Reports</a>
+    </nav>
+
+    <h1>Student Reports</h1>
+    <h2>Marks, Average & Grades</h2>
+    <!-- Search & Filter Form -->
+<div style="text-align:center; margin-bottom:20px;">
+    <form method="get" action="{% url 'student_reports' %}">
+        <input type="text" name="search" placeholder="Search by Name or Reg No" value="{{ request.GET.search }}" style="padding:5px; width:200px;">
+        
+        <select name="branch" style="padding:5px; width:150px;">
+            <option value="">All Branches</option>
+            {% for branch in branches %}
+            <option value="{{ branch }}" {% if request.GET.branch == branch %}selected{% endif %}>{{ branch }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" style="padding:5px 10px; background:#1780f0; color:white; border:none; cursor:pointer;">Search</button>
+    </form>
+</div>
+
+
+    <!-- Student-wise Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>Physics</th>
+                    <th>Chemistry</th>
+                    <th>Math</th>
+                    <th>Average</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.regno }}</td>
+                    <td>{{ student.student_name }}</td>
+                    <td>{{ student.branch }}</td>
+                    <td>{{ student.phy }}</td>
+                    <td>{{ student.chem }}</td>
+                    <td>{{ student.math }}</td>
+                    <td>{{ student.average }}</td>
+                    <td>{{ student.grade }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No students available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Class Subject Averages</h2>
+
+    <!-- Class Average Table -->
+    <div class="sub-table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Physics Avg</th>
+                    <th>Chemistry Avg</th>
+                    <th>Math Avg</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="footer-row">
+                    <td>{{ class_avg_phy }}</td>
+                    <td>{{ class_avg_chem }}</td>
+                    <td>{{ class_avg_math }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

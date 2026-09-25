@@ -1,0 +1,43 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}All Instructors - University Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-primary"><i class="bi bi-person-badge"></i> All Instructors and Their Courses</h1>
+    <span class="badge bg-secondary fs-6">{{ instructors_courses|length }} instructors</span>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th><i class="bi bi-person"></i> Instructor Name</th>
+                <th><i class="bi bi-building"></i> Department</th>
+                <th><i class="bi bi-book"></i> Courses Taught</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in instructors_courses %}
+            <tr>
+                <td><strong>{{ item.instructor.name }}</strong></td>
+                <td><span class="badge bg-info">{{ item.instructor.dept_name }}</span></td>
+                <td>
+                    {% if item.courses %}
+                        {% for course in item.courses %}
+                            <span class="badge bg-success me-1">{{ course }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">No courses assigned</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted">No instructors found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

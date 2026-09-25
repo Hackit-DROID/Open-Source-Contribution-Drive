@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant - SGGS Library{% endblock %}
+{% block content %}
+<h2>Library AI Assistant</h2>
+<p>Ask for book suggestions, short summaries, or study help.</p>
+
+<div class="chat-box card">
+    <div class="chat-log" id="chat-log">
+        <div class="chat-msg bot">
+            <div class="who">Assistant</div>
+            <div>Hello! Ask me about any book in the library, or tell me what you want to learn and I'll suggest something.</div>
+        </div>
+    </div>
+    <form class="chat-form" id="chat-form">
+        {% csrf_token %}
+        <input type="text" name="question" id="question" placeholder="e.g. Suggest a beginner book on data structures" autocomplete="off" required>
+        <button type="submit" class="btn">Send</button>
+    </form>
+</div>
+
+<script>
+(function () {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('question');
+    const log = document.getElementById('chat-log');
+    const csrf = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function append(cls, who, text) {
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-msg ' + cls;
+        const w = document.createElement('div');
+        w.className = 'who';
+        w.textContent = who;
+        const m = document.createElement('div');
+        m.textContent = text;
+        wrap.appendChild(w);
+        wrap.appendChild(m);
+        log.appendChild(wrap);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const q = input.value.trim();
+        if (!q) return;
+        append('user', 'You', q);
+        input.value = '';
+        input.disabled = true;
+
+        try {
+            const body = new URLSearchParams({question: q});
+            const res = await fetch("{% url 'ai:chat_ask' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrf,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body.toString()
+            });
+            const data = await res.json();
+            append('bot', 'Assistant', data.answer || data.error || 'No response.');
+        } catch (err) {
+            append('bot', 'Assistant', 'Something went wrong. Please try again.');
+        } finally {
+            input.disabled = false;
+            input.focus();
+        }
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Books</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; }
+        nav { background-color: #004080; padding: 15px 20px; }
+        nav a { color: white; margin-right: 20px; text-decoration: none; font-weight: bold; padding: 8px 12px; border-radius: 4px; transition: background-color 0.3s; }
+        nav a:hover { background-color: #0073e6; }
+        .container { padding: 20px 40px; }
+        h1 { color: #004080; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background-color: #004080; color: white; }
+        tr:nth-child(even) { background-color: #e6f2ff; }
+        tr:hover { background-color: #cce0ff; }
+        .no-data { text-align: center; font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/students/">Students</a>
+        <a href="/hostels/">Hostels</a>
+        <a href="/books/">Library</a>
+        <a href="/accounts/">Accounts</a>
+        <a href="/faculty/">Faculty</a>
+    </nav>
+
+    <div class="container">
+        <h1>Library Books</h1>
+
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Quantity</th>
+            </tr>
+            {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.quantity }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td class="no-data" colspan="3">No books found</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

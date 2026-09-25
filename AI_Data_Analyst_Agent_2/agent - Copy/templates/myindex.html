@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Data Analyst Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>📊 AI Dashboard</h2>
+            <p>Upload & Analyze Data</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main">
+
+            <!-- Upload Section -->
+            <div class="section">
+                <h3>📁 Upload CSV</h3>
+                <input type="file" id="file">
+                <button onclick="upload()">Upload</button>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="section">
+                <h3>🎯 Filters</h3>
+                <div id="filters"></div>
+                <button onclick="applyFilters()">Apply Filters</button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="cards">
+                <div class="card">
+                    <h4>Total Rows</h4>
+                    <p id="rows">-</p>
+                </div>
+                <div class="card">
+                    <h4>Total Columns</h4>
+                    <p id="cols">-</p>
+                </div>
+                <div class="card">
+                    <h4>Numeric Columns</h4>
+                    <p id="numcols">-</p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="section">
+                <h3>📊 Charts</h3>
+
+                <div class="chart-grid">
+                    <canvas id="barChart"></canvas>
+                    <canvas id="lineChart"></canvas>
+                    <canvas id="pieChart"></canvas>
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="section chat-box">
+                <h3>💬 Ask About Data</h3>
+                <input id="query" placeholder="e.g. Average bill on Sunday">
+                <button onclick="ask()">Ask</button>
+            </div>
+
+            <!-- Output -->
+            <div id="response" class="section"></div>
+
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+
+</body>
+
+</html>

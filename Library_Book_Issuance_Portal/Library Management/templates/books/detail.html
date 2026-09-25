@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} - SGGS Library{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>{{ book.title }}</h2>
+    <p class="meta">by {{ book.author }}{% if book.category %} &middot; {{ book.category.name }}{% endif %}</p>
+    <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+    <p>
+        <strong>Copies:</strong> {{ book.available_copies }} available of {{ book.total_copies }}
+        {% if book.is_available %}
+            <span class="available">(available)</span>
+        {% else %}
+            <span class="unavailable">(all issued)</span>
+        {% endif %}
+    </p>
+
+    {% if book.ai_summary %}
+        <h3>Summary</h3>
+        <p>{{ book.ai_summary }}</p>
+    {% endif %}
+
+    {% if book.description %}
+        <h3>Description</h3>
+        <p>{{ book.description|linebreaksbr }}</p>
+    {% endif %}
+
+    {% if book.tag_list %}
+        <div class="tags">
+            {% for tag in book.tag_list %}<span class="tag">{{ tag }}</span>{% endfor %}
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        {% if user.is_student and book.is_available %}
+            <form method="post" action="{% url 'transactions:issue' book.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">Issue this book</button>
+            </form>
+        {% endif %}
+        {% if user.is_librarian %}
+            <a href="{% url 'books:edit' book.pk %}" class="btn btn-muted">Edit</a>
+            <a href="{% url 'books:delete' book.pk %}" class="btn btn-danger">Delete</a>
+        {% endif %}
+        <a href="{% url 'books:list' %}" class="btn btn-muted">Back to list</a>
+    </div>
+</div>
+{% endblock %}

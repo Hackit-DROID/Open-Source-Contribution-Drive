@@ -1,0 +1,12 @@
+<h2>{{ student.name }}</h2>
+
+<ul>
+{% for m in marks %}
+<li>{{ m.subject }}: {{ m.total() }}</li>
+{% endfor %}
+</ul>
+
+<h3>Total: {{ total }}</h3>
+
+<h3>AI Report:</h3>
+<p>{{ ai_report }}</p>

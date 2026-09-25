@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Topper Details</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+        }
+
+        /* Navigation Bar */
+        nav {
+            background: #1780f0;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 25px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: #ffd700;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1780f0;
+            margin: 20px 0 5px 0;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
+        .table-container {
+            width: 95%;
+            overflow-x: auto;
+            margin: auto;
+            margin-bottom: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px 15px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        th {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            font-size: 16px;
+        }
+        tr:nth-child(even) td {
+            background: #f9f9f9;
+        }
+        tr:hover td {
+            background: #f0f8ff;
+        }
+
+        .green-row {
+            background: #d9f2d9 !important;
+            font-weight: bold;
+        }
+        .yellow-row {
+            background: #fff8b3 !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="{% url 'all_students' %}">All Students</a>
+        <a href="{% url 'toppers' %}">Toppers</a>
+        <a href="{% url 'student_reports' %}">Student Reports</a>
+
+    </nav>
+
+    <h1>Students Management Portal</h1>
+    <h2>🏅 Subject Toppers & 🏆 Class Topper</h2>
+
+    <!-- Physics Topper -->
+    <h3>🏅 Physics Topper</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>PHY</th>
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="green-row">
+                    <td>{{ phy_topper.regno }}</td>
+                    <td>{{ phy_topper.student_name }}</td>
+                    <td>{{ phy_topper.branch }}</td>
+                    <td>{{ phy_topper.phy }}</td>
+                    <td>{{ phy_topper.average|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Chemistry Topper -->
+    <h3>🏅 Chemistry Topper</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>CHEM</th>
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="green-row">
+                    <td>{{ chem_topper.regno }}</td>
+                    <td>{{ chem_topper.student_name }}</td>
+                    <td>{{ chem_topper.branch }}</td>
+                    <td>{{ chem_topper.chem }}</td>
+                    <td>{{ chem_topper.average|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Math Topper -->
+    <h3>🏅 Math Topper</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                    <th>Branch</th>
+                    <th>MATH</th>
+                    <th>Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="g

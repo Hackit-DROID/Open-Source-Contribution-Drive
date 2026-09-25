@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between">
+  <h3>Requests</h3>
+  <a class="btn btn-danger" href="{% url 'add_request' %}">Add Request</a>
+</div>
+<div class="card p-3 mt-2">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Group</th><th>Units</th><th>Hospital</th><th>Date</th></tr></thead>
+    <tbody>
+    {% for r in reqs %}
+      <tr><td>{{ r.requester_name }}</td><td>{{ r.blood_group }}</td><td>{{ r.units_needed }}</td><td>{{ r.hospital.name }}</td><td>{{ r.created_at }}</td></tr>
+    {% empty %}<tr><td colspan="5">No requests</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

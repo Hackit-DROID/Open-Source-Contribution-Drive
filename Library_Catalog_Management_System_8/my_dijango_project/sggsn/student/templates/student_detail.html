@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Student Detail</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #1976d2;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+    }
+    li strong {
+      color: #333;
+      display: inline-block;
+      width: 120px;
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      text-decoration: none;
+      color: white;
+      background: #1976d2;
+      padding: 10px 15px;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    .back:hover {
+      background: #125a9c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Student: {{ student.name }}</h2>
+    <ul>
+      <li><strong>Reg No:</strong> {{ student.regno }}</li>
+      <li><strong>Age:</strong> {{ student.age }}</li>
+      <li><strong>Email:</strong> {{ student.email }}</li>
+      <li><strong>Physics:</strong> {{ student.phy }}</li>
+      <li><strong>Mathematics:</strong> {{ student.math }}</li>
+      <li><strong>Chemistry:</strong> {{ student.chem }}</li> 
+    </ul>
+    <a class="back" href="{% url 'student_list' %}">← Back to list</a>
+  </div>
+</body>
+</html>

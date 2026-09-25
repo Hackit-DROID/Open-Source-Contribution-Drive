@@ -1,0 +1,76 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}All Students - University Portal{% endblock %}
+
+{% block content %}
+<div class="card-header-custom mb-3">
+  <div class="d-flex align-items-center gap-3">
+    <h1 class="card-title d-flex align-items-center text-dark mb-0">
+      <i class="bi bi-mortarboard me-2 text-primary"></i> All Students
+    </h1>
+    <span class="badge bg-gradient text-white shadow-sm px-3 py-2"
+          style="background: linear-gradient(90deg, #2c3e50, #5bc0be); font-size: 0.9rem;">
+      {{ students|length }} students
+    </span>
+  </div>
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="muted">
+      Browse student records — click a row to view more details (if detail pages exist).
+    </div>
+    <a href="{% url 'add_student' %}" class="btn btn-primary">+ Add Student</a>
+  </div>
+</div>
+
+<div class="table-responsive rounded-lg shadow-soft">
+  <table class="table align-middle table-striped table-hover mb-0">
+    <thead>
+      <tr class="text-uppercase small text-muted">
+        <th><i class="bi bi-hash me-1"></i> Student ID</th>
+        <th><i class="bi bi-person me-1"></i> Name</th>
+        <th><i class="bi bi-building me-1"></i> Department</th>
+        <th><i class="bi bi-award me-1"></i> Total Credits</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr class="bg-white">
+        <td>
+          <span class="badge rounded-pill text-bg-secondary px-3 py-2">{{ student.ID }}</span>
+        </td>
+
+        <td>
+          <strong class="text-dark">{{ student.name }}</strong>
+          {% if student.year %}
+            <div class="muted small">Year {{ student.year }}</div>
+          {% endif %}
+        </td>
+
+        <td>
+          <span class="badge rounded-pill text-bg-info text-dark px-3 py-2 fw-semibold">
+            {{ student.dept_name }}
+          </span>
+        </td>
+
+        <td>
+          <span class="badge rounded-pill bg-primary text-white px-3 py-2 fw-semibold">
+            {{ student.tot_cred }}
+          </span>
+        </td>
+        <td>
+          <a href="{% url 'delete_student' student.ID %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this student?')">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center py-4">
+          <div class="text-muted">
+            <i class="bi bi-exclamation-circle me-1"></i> No students found.
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

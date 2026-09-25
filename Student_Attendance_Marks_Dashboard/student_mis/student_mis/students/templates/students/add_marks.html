@@ -1,0 +1,207 @@
+{% extends 'students/base.html' %}
+
+{% block title %}Add Marks - Student MIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 px-0 sidebar">
+            <nav class="nav flex-column py-3">
+                <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a class="nav-link active" href="{% url 'student_list' %}">
+                    <i class="fas fa-users"></i> All Students
+                </a>
+                <a class="nav-link" href="{% url 'add_student' %}">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 px-4 py-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-chart-line"></i> Add/Update Marks</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Student:</strong> {{ student.name }} ({{ student.reg_no }})<br>
+                        <strong>Marks Weightage:</strong> ISE-1 (20%) + Midterm (20%) + End-Term (60%) = Total (100)
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Subject 1 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">Subject 1</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="subject1_name" class="form-label">Subject Name</label>
+                                        <input type="text" class="form-control" id="subject1_name" name="subject1_name" 
+                                               value="{{ marks.subject1_name }}" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject1_ise1" class="form-label">ISE-1 (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject1_ise1" 
+                                               name="subject1_ise1" value="{{ marks.subject1_ise1 }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject1_mid" class="form-label">Mid (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject1_mid" 
+                                               name="subject1_mid" value="{{ marks.subject1_mid }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject1_end" class="form-label">End (60)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject1_end" 
+                                               name="subject1_end" value="{{ marks.subject1_end }}" max="60" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject 2 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">Subject 2</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="subject2_name" class="form-label">Subject Name</label>
+                                        <input type="text" class="form-control" id="subject2_name" name="subject2_name" 
+                                               value="{{ marks.subject2_name }}" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject2_ise1" class="form-label">ISE-1 (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject2_ise1" 
+                                               name="subject2_ise1" value="{{ marks.subject2_ise1 }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject2_mid" class="form-label">Mid (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject2_mid" 
+                                               name="subject2_mid" value="{{ marks.subject2_mid }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject2_end" class="form-label">End (60)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject2_end" 
+                                               name="subject2_end" value="{{ marks.subject2_end }}" max="60" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject 3 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">Subject 3</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="subject3_name" class="form-label">Subject Name</label>
+                                        <input type="text" class="form-control" id="subject3_name" name="subject3_name" 
+                                               value="{{ marks.subject3_name }}" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject3_ise1" class="form-label">ISE-1 (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject3_ise1" 
+                                               name="subject3_ise1" value="{{ marks.subject3_ise1 }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject3_mid" class="form-label">Mid (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject3_mid" 
+                                               name="subject3_mid" value="{{ marks.subject3_mid }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject3_end" class="form-label">End (60)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject3_end" 
+                                               name="subject3_end" value="{{ marks.subject3_end }}" max="60" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject 4 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0">Subject 4</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="subject4_name" class="form-label">Subject Name</label>
+                                        <input type="text" class="form-control" id="subject4_name" name="subject4_name" 
+                                               value="{{ marks.subject4_name }}" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject4_ise1" class="form-label">ISE-1 (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject4_ise1" 
+                                               name="subject4_ise1" value="{{ marks.subject4_ise1 }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject4_mid" class="form-label">Mid (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject4_mid" 
+                                               name="subject4_mid" value="{{ marks.subject4_mid }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject4_end" class="form-label">End (60)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject4_end" 
+                                               name="subject4_end" value="{{ marks.subject4_end }}" max="60" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject 5 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">Subject 5</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="subject5_name" class="form-label">Subject Name</label>
+                                        <input type="text" class="form-control" id="subject5_name" name="subject5_name" 
+                                               value="{{ marks.subject5_name }}" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject5_ise1" class="form-label">ISE-1 (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject5_ise1" 
+                                               name="subject5_ise1" value="{{ marks.subject5_ise1 }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject5_mid" class="form-label">Mid (20)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject5_mid" 
+                                               name="subject5_mid" value="{{ marks.subject5_mid }}" max="20" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="subject5_end" class="form-label">End (60)</label>
+                                        <input type="number" step="0.01" class="form-control" id="subject5_end" 
+                                               name="subject5_end" value="{{ marks.subject5_end }}" max="60" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Save Marks
+                            </button>
+                            <a href="{% url 'student_list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
