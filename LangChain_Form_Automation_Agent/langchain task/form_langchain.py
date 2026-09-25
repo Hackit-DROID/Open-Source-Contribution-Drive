@@ -12,17 +12,21 @@ llm = ChatOpenAI(
     model="openai/gpt-3.5-turbo"
 )
 
-SHEET_URL = "https://docs.google.com/spreadsheets/d/12uWwn4JHwYrqiSH4_yVr-LqnuNW8jrC-eV9Rp2x534Q/gviz/tq?tqx=out:csv"
+DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/12uWwn4JHwYrqiSH4_yVr-LqnuNW8jrC-eV9Rp2x534Q/gviz/tq?tqx=out:csv"
+SHEET_URL = os.getenv("GOOGLE_SHEET_CSV_URL", DEFAULT_SHEET_URL)
 
-# Read Google Sheet
-df = pd.read_csv(SHEET_URL)
+def run_form_langchain():
+    # Read Google Sheet
+    df = pd.read_csv(SHEET_URL)
+    print("Columns:", df.columns)
 
-print("Columns:", df.columns)
+    # Last response question (2nd column)
+    question = df.iloc[-1][df.columns[1]]
+    response = llm.invoke(question)
 
-# Last response ka question (2nd column)
-question = df.iloc[-1][df.columns[1]]
+    print("User Question:", question)
+    print("LangChain Answer:", response.content)
+    return response.content
 
-response = llm.invoke(question)
-
-print("User Question:", question)
-print("LangChain Answer:", response.content)
+if __name__ == "__main__":
+    run_form_langchain()

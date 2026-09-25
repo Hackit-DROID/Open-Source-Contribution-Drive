@@ -45,7 +45,7 @@ from resilient_graph import (
 import email_langchain
 
 
-class TestSchema(TypedDict):
+class SampleGraphSchema(TypedDict):
     question: str
     answer: str
 
@@ -225,15 +225,15 @@ class TestResilientGraphCore(unittest.TestCase):
     def test_state_validation(self):
         """Requirement 6: State schema and type validation."""
         valid_state = {"question": "What is Python?", "answer": "A language"}
-        validate_state(valid_state, TestSchema)
+        validate_state(valid_state, SampleGraphSchema)
 
         # Missing required key
         with self.assertRaises(StateValidationError):
-            validate_state({"question": "Missing answer"}, TestSchema)
+            validate_state({"question": "Missing answer"}, SampleGraphSchema)
 
         # Type mismatch
         with self.assertRaises(StateValidationError):
-            validate_state({"question": 12345, "answer": "Answer"}, TestSchema)
+            validate_state({"question": 12345, "answer": "Answer"}, SampleGraphSchema)
 
     def test_exponential_backoff_calculation(self):
         """Requirement 3: Exponential backoff delay calculation and cap."""
@@ -518,6 +518,7 @@ class TestEmailLangChainWorkflow(unittest.TestCase):
                 self.assertEqual(mock_sleep.call_count, 1)
                 self.assertEqual(result.get("trace"), ["get_input", "get_input", "llm_answer", "send_email"])
 
+
     def test_email_workflow_sheet_exhaustion_recovery(self):
         """Persistent Google Sheet failure exhausts retries and routes to recovery."""
         mock_sleep = MagicMock()
@@ -537,6 +538,40 @@ class TestEmailLangChainWorkflow(unittest.TestCase):
             self.assertEqual(result.get("recovery_status"), "recovered")
             self.assertEqual(mock_sleep.call_count, 2)
             self.assertEqual(result.get("trace"), ["get_input", "get_input", "get_input", "recovery"])
+
+
+class TestFormAgents(unittest.TestCase):
+    """Unit tests for standalone and supabase form agents."""
+
+    def test_supabase_form_agent_pipeline(self):
+        import supabase_form_agent
+        mock_df = MagicMock()
+        mock_df.empty = False
+        mock_df.columns = ["Email", "Ask your question here !", "Name", "phone no"]
+        mock_df.iloc = [{"Email": "alice@example.com", "Ask your question here !": "How to contribute?", "Name": "Alice", "phone no": "12345"}]
+
+        with patch("supabase_form_agent.pd.read_csv", return_value=mock_df), \
+             patch("supabase_form_agent.get_llm") as mock_llm_fn, \
+             patch("smtplib.SMTP") as mock_smtp:
+            mock_llm = MagicMock()
+            mock_llm.invoke.return_value.content = "Fork the repo and create a PR."
+            mock_llm_fn.return_value = mock_llm
+            mock_smtp.return_value.__enter__.return_value = MagicMock()
+
+            app = supabase_form_agent.build_supabase_form_agent()
+            result = app.invoke({})
+
+            self.assertEqual(result.get("email"), "alice@example.com")
+            self.assertEqual(result.get("answer"), "Fork the repo and create a PR.")
+            self.assertEqual(result.get("name"), "Alice")
+
+    def test_sheet_webhook_agent_save(self):
+        import sheet_webhook_agent
+        with patch("sheet_webhook_agent.requests.post") as mock_post:
+            mock_post.return_value.status_code = 200
+            res = sheet_webhook_agent.save_answer_to_sheet("Test answer")
+            self.assertIsNotNone(res)
+            mock_post.assert_called_once()
 
 
 if __name__ == "__main__":

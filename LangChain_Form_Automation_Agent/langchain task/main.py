@@ -49,9 +49,10 @@ app = graph.compile()
 # -----------------------
 # RUN GRAPH
 # -----------------------
-result = app.invoke({
-    "question": "hello langchain"
-})
+if __name__ == "__main__":
+    result = app.invoke({
+        "question": "hello langchain"
+    })
 
-print("\n✅ FINAL RESULT:")
-print(result["answer"])
+    print("\n✅ FINAL RESULT:")
+    print(result["answer"])
