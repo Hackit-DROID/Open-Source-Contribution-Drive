@@ -1,1 +1,0 @@
-# OpenCode LLM Integration Package
