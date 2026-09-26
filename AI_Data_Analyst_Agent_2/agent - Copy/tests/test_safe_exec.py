@@ -210,14 +210,14 @@ class TestAppQueryEndpoint(unittest.TestCase):
         self.app = flask_app.app
         self.client = self.app.test_client()
         # Set up a sample global dataframe
-        flask_app.df_global = pd.DataFrame({
+        flask_app.load_dataset(pd.DataFrame({
             "dept": ["Engineering", "Marketing", "Engineering"],
             "salary": [90000, 60000, 95000]
-        })
+        }))
 
     def test_query_no_dataset(self):
         import app as flask_app
-        flask_app.df_global = None
+        flask_app.reset_dataset()
         res = self.client.post("/query", json={"question": "What is the average salary?"})
         self.assertEqual(res.status_code, 400)
         data = res.get_json()
