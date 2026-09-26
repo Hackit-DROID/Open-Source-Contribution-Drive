@@ -14,11 +14,26 @@ from collections import defaultdict
 # ── Load environment variables ──
 load_dotenv()
 
+# ── Configuration Constants ──
+DEFAULT_PAGE_SIZE = 25
+DEFAULT_PORT = 5001
+SECRET_KEY_DEFAULT = 'marksheet-secret-2024'
+TEST1_MAX_MARKS = 20
+TEST2_MAX_MARKS = 20
+FINAL_EXAM_MAX_MARKS = 60
+TOP_PERFORMERS_LIMIT = 10
+GRADE_O_THRESHOLD = 90
+GRADE_A_PLUS_THRESHOLD = 80
+GRADE_A_THRESHOLD = 70
+GRADE_B_PLUS_THRESHOLD = 60
+GRADE_B_THRESHOLD = 50
+GRADE_C_THRESHOLD = 40
+
 # ── Initialize Flask ──
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///marks.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'marksheet-secret-2024')
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', SECRET_KEY_DEFAULT)
 
 # ── Initialize DB ──
 db.init_app(app)
@@ -124,8 +139,8 @@ def add_marks(student_id):
                 return redirect(url_for('add_marks', student_id=student_id))
 
             # Validate ranges
-            if not (0 <= t1 <= 20 and 0 <= t2 <= 20 and 0 <= final <= 60):
-                flash(f'Marks out of range for {subject}! Test1/Test2: 0-20, Final: 0-60', 'danger')
+            if not (0 <= t1 <= TEST1_MAX_MARKS and 0 <= t2 <= TEST2_MAX_MARKS and 0 <= final <= FINAL_EXAM_MAX_MARKS):
+                flash(f'Marks out of range for {subject}! Test1/Test2: 0-{TEST1_MAX_MARKS}, Final: 0-{FINAL_EXAM_MAX_MARKS}', 'danger')
                 return redirect(url_for('add_marks', student_id=student_id))
 
             mark = Marks(student_id=student_id, subject=subject,
@@ -162,13 +177,13 @@ def report(student_id):
     percentage = (total / (len(marks) * 100)) * 100
 
     # Overall grade
-    if percentage >= 90:   overall_grade = 'O'
-    elif percentage >= 80: overall_grade = 'A+'
-    elif percentage >= 70: overall_grade = 'A'
-    elif percentage >= 60: overall_grade = 'B+'
-    elif percentage >= 50: overall_grade = 'B'
-    elif percentage >= 40: overall_grade = 'C'
-    else:                  overall_grade = 'F'
+    if percentage >= GRADE_O_THRESHOLD:        overall_grade = 'O'
+    elif percentage >= GRADE_A_PLUS_THRESHOLD: overall_grade = 'A+'
+    elif percentage >= GRADE_A_THRESHOLD:      overall_grade = 'A'
+    elif percentage >= GRADE_B_PLUS_THRESHOLD: overall_grade = 'B+'
+    elif percentage >= GRADE_B_THRESHOLD:      overall_grade = 'B'
+    elif percentage >= GRADE_C_THRESHOLD:      overall_grade = 'C'
+    else:                                      overall_grade = 'F'
 
     # Pass/Fail — all subjects must pass
     result = 'Pass' if all(m.is_pass() for m in marks) else 'Fail'
@@ -316,7 +331,7 @@ def dashboard():
             })
 
     avg_percentage = sum(percentages) / len(percentages) if percentages else 0.0
-    top_performers = sorted(top_performers, key=lambda x: x['percentage'], reverse=True)[:10]
+    top_performers = sorted(top_performers, key=lambda x: x['percentage'], reverse=True)[:TOP_PERFORMERS_LIMIT]
 
     # Subject-wise average
     subject_totals  = defaultdict(int)
@@ -367,4 +382,4 @@ if __name__ == '__main__':
         db.create_all()
         print("✅ Database tables created.")
         print(f"🤖 Available AI Providers: {llm.get_available_providers()}")
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=DEFAULT_PORT)
