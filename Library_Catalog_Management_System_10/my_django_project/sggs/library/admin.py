@@ -5,5 +5,6 @@ class LibraryAdmin(admin.ModelAdmin):
     list_display = ['book_id', 'title', 'author', 'issued_to', 'issued_date']
     search_fields = ['book_id', 'title', 'author']
     ordering = ['book_id']
+    list_select_related = ['issued_to']
 
 admin.site.register(Library, LibraryAdmin)
