@@ -28,12 +28,9 @@ try:
 except ImportError:
     ChatOpenAI = None
 
-try:
-    from langgraph.graph import StateGraph, END
-except ImportError:
-    from resilient_graph import StateGraph, END
-
 from resilient_graph import (
+    StateGraph,
+    END,
     classify_error,
     calculate_backoff_delay,
     execute_backoff,
@@ -61,7 +58,8 @@ APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 # ---------------------------
 # Google Sheet (CSV read)
 # ---------------------------
-SHEET_URL = "https://docs.google.com/spreadsheets/d/12uWwn4JHwYrqiSH4_yVr-LqnuNW8jrC-eV9Rp2x534Q/gviz/tq?tqx=out:csv"
+DEFAULT_SHEET_URL = "https://docs.google.com/spreadsheets/d/12uWwn4JHwYrqiSH4_yVr-LqnuNW8jrC-eV9Rp2x534Q/gviz/tq?tqx=out:csv"
+SHEET_URL = os.getenv("GOOGLE_SHEET_CSV_URL", DEFAULT_SHEET_URL)
 
 # ---------------------------
 # LangGraph State

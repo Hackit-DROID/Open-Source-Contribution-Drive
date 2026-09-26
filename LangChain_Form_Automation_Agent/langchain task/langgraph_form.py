@@ -49,36 +49,34 @@ app = graph.compile()
 # -----------------------------
 # 6️⃣ Read Google Sheet
 # -----------------------------
-# -----------------------------
-# 6️⃣ Read Google Sheet (FIXED)
-# -----------------------------
-SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/12uWwn4JHwYrqiSH4_yVr-LqnuNW8jrC-eV9Rp2x534Q/export?format=csv"
+DEFAULT_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/12uWwn4JHwYrqiSH4_yVr-LqnuNW8jrC-eV9Rp2x534Q/export?format=csv"
+SHEET_CSV_URL = os.getenv("GOOGLE_SHEET_CSV_URL", DEFAULT_SHEET_CSV_URL)
 
-df = pd.read_csv(
-    SHEET_CSV_URL,
-    engine="python",
-    on_bad_lines="skip"
-)
+def run_graph():
+    df = pd.read_csv(
+        SHEET_CSV_URL,
+        engine="python",
+        on_bad_lines="skip"
+    )
 
-# Remove hidden spaces in column names
-df.columns = df.columns.str.strip()
+    # Remove hidden spaces in column names
+    df.columns = df.columns.str.strip()
+    print("Columns:", df.columns)
 
-# Check columns
-print(df.columns)
+    # Get last question
+    question_col = next((col for col in df.columns if "question" in col.lower()), df.columns[1] if len(df.columns) > 1 else df.columns[0])
+    user_question = df[question_col].iloc[-1]
+    print("User Question:", user_question)
 
-# Get last question
-user_question = df["Ask Your Questions here !"].iloc[-1]
-print("User Question:", user_question)
+    # -----------------------------
+    # 7️⃣ Invoke Graph
+    # -----------------------------
+    result = app.invoke({
+        "question": str(user_question)
+    })
 
+    print("LangChain Answer:", result["answer"])
+    return result
 
-user_question = df["Ask Your Questions here !"].iloc[-1]
-print("User Question:", user_question)
-
-# -----------------------------
-# 7️⃣ Invoke Graph
-# -----------------------------
-result = app.invoke({
-    "question": user_question
-})
-
-print("LangChain Answer:", result["answer"])
+if __name__ == "__main__":
+    run_graph()
