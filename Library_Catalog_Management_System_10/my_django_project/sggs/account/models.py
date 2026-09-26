@@ -10,5 +10,11 @@ class Account(models.Model):
 
     branch = models.CharField(max_length=50, default='Unknown')  # optional if you want branch here
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['student', 'library'], name='account_student_library_idx'),
+            models.Index(fields=['due'], name='account_due_idx'),
+        ]
+
     def __str__(self):
         return f"{self.student.name} Account"

@@ -5,6 +5,7 @@ class AccountAdmin(admin.ModelAdmin):
     list_display = ('student_name', 'student_roll_no', 'fees_paid', 'due')  # display related student info
     ordering = ('student__roll_no',)
     search_fields = ('student__name', 'student__roll_no')  # search by student name or roll no
+    list_select_related = ('student',)
 
     # Method to display student name
     def student_name(self, obj):

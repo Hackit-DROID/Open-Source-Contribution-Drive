@@ -23,7 +23,7 @@ def dashboard(request):
     students = Student.objects.all().order_by('-id')[:5]
     hostels = Hostel.objects.all().order_by('-id')[:5]
     books = Library.objects.all().order_by('-id')[:5]
-    accounts = Account.objects.all().order_by('-id')[:5]
+    accounts = Account.objects.select_related('student').order_by('-id')[:5]
     faculties = Faculty.objects.all().order_by('-id')[:5]
 
     context = {
@@ -59,7 +59,7 @@ def books(request):
     return render(request, 'books.html', {'books': Library.objects.all()})
 
 def accounts(request):
-    return render(request, 'accounts.html', {'accounts': Account.objects.all()})
+    return render(request, 'accounts.html', {'accounts': Account.objects.select_related('student')})
 
 def faculty(request):
     return render(request, 'faculty.html', {'faculties': Faculty.objects.all()})

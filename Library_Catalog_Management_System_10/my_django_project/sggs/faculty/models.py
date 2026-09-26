@@ -7,5 +7,10 @@ class Faculty(models.Model):
     email = models.EmailField(unique=True, null=True, blank=True)
     phone = models.CharField(max_length=15, null=True, blank=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['department'], name='faculty_department_idx'),
+        ]
+
     def __str__(self):
         return f"{self.emp_id} - {self.name}"
