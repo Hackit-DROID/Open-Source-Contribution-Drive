@@ -1,7 +1,13 @@
 """Unit tests for Multi-Unit Blood Inventory Splitting & Aliquot Unit Tracker (CR-802)."""
 
+import os
+import sys
 from datetime import datetime, timedelta, timezone
 import pytest
+
+_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 from inventory.aliquot_tracker import (
     AliquotTrackerEngine,
