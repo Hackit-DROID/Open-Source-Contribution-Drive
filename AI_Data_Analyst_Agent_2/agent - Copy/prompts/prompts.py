@@ -11,6 +11,7 @@ IMPORTANT:
 - Use ONLY df
 - Return ONLY expression
 - No explanation
+- To save a file, write it only to scratch_path('name.csv')
 
 Question: {question}
 """

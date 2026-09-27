@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, make_response
 import pandas as pd
 
 from utils.llm import generate_pandas_code, explain_result
@@ -8,8 +8,20 @@ from utils.charts import generate_charts
 from utils.data import apply_filters
 from utils.safe_exec import execute_safe_code, SecurityViolationError, CodeTimeoutError, sanitize_code
 from utils.concurrency import VersionedStore, VersionedEntity, RetryExhaustedError, retry_on_conflict
+from utils.file_sandbox import (
+    DEFAULT_MAX_BYTES,
+    DEFAULT_MAX_FILES,
+    DEFAULT_SCRATCH_ROOT,
+    FileSandbox,
+    SandboxQuotaError,
+    cleanup_stale_sandboxes,
+)
 
 app = Flask(__name__)
+app.config.setdefault("SANDBOX_SCRATCH_DIR", DEFAULT_SCRATCH_ROOT)
+app.config.setdefault("SANDBOX_MAX_BYTES", DEFAULT_MAX_BYTES)
+app.config.setdefault("SANDBOX_MAX_FILES", DEFAULT_MAX_FILES)
+cleanup_stale_sandboxes(app.config["SANDBOX_SCRATCH_DIR"])
 
 DATASET_KEY = "dataset"
 UPDATE_MAX_ATTEMPTS = 25
@@ -211,10 +223,30 @@ def query():
         }), 400
 
     code = generate_pandas_code(question, snapshot.value.columns)
+    sandbox = FileSandbox(
+        root=app.config["SANDBOX_SCRATCH_DIR"],
+        max_bytes=app.config["SANDBOX_MAX_BYTES"],
+        max_files=app.config["SANDBOX_MAX_FILES"],
+    )
+    try:
+        response = make_response(_execute_query(question, code, snapshot, sandbox))
+    except BaseException:
+        sandbox.cleanup()
+        raise
+    response.call_on_close(sandbox.cleanup)
+    return response
 
+
+def _execute_query(question, code, snapshot, sandbox):
     try:
         # Secure sandbox execution with AST inspection and timeout bounds
-        result = execute_safe_code(code, snapshot.value.copy())
+        result = execute_safe_code(code, snapshot.value.copy(), sandbox=sandbox)
+    except SandboxQuotaError as e:
+        return jsonify({
+            "error": f"Sandbox quota exceeded: {str(e)}",
+            "status": "blocked",
+            "code": code
+        }), 413
     except SecurityViolationError as e:
         return jsonify({
             "error": f"Security violation detected: {str(e)}",
@@ -241,7 +273,8 @@ def query():
         "explanation": explanation,
         "code": code,
         "status": "success",
-        "version": snapshot.version
+        "version": snapshot.version,
+        "files": sandbox.list_files()
     })
 
 
