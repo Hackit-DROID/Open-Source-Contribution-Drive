@@ -103,7 +103,8 @@ def add_instructor(request):
             ID=int(request.POST['ID']),
             name=request.POST['name'],
             dept_name_id=request.POST['dept_name'],
-            salary=int(request.POST['salary'])
+            salary=int(request.POST['salary']),
+            email=request.POST.get('email', '').strip()
         )
         messages.success(request, 'Instructor added successfully!')
         return redirect('instructors_list')
@@ -116,7 +117,8 @@ def add_student(request):
             ID=int(request.POST['ID']),
             name=request.POST['name'],
             dept_name_id=request.POST['dept_name'],
-            tot_cred=int(request.POST['tot_cred'])
+            tot_cred=int(request.POST['tot_cred']),
+            email=request.POST.get('email', '').strip()
         )
         messages.success(request, 'Student added successfully!')
         return redirect('students_list')

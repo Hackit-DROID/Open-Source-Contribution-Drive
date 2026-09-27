@@ -1,0 +1,11 @@
+{% extends "portal/emails/base.html" %}
+
+{% block title %}Enrollment confirmed: {{ course_id }}{% endblock %}
+
+{% block content %}
+<p>You are now enrolled in <strong>{{ course_id }}{% if course_title %} - {{ course_title }}{% endif %}</strong>, section <strong>{{ sec_id }}</strong>, for <strong>{{ semester }} {{ year }}</strong>.</p>
+{% if credits %}
+<p>This course carries <strong>{{ credits }}</strong> credit{{ credits|pluralize }}.</p>
+{% endif %}
+<p>Check the timetable for your class schedule and room.</p>
+{% endblock %}

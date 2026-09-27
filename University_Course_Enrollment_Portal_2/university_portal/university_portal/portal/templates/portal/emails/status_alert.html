@@ -1,0 +1,11 @@
+{% extends "portal/emails/base.html" %}
+
+{% block title %}Account update: {{ status }}{% endblock %}
+
+{% block content %}
+<p>Your {{ portal_name }} account status is now <strong>{{ status }}</strong>.</p>
+{% if reason %}
+<p>Reason: {{ reason }}</p>
+{% endif %}
+<p>Contact the registrar's office if you have any questions.</p>
+{% endblock %}
