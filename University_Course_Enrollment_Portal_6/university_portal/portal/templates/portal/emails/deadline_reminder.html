@@ -1,0 +1,11 @@
+{% extends "portal/emails/base.html" %}
+
+{% block title %}Reminder: {{ deadline_name }}{% endblock %}
+
+{% block content %}
+<p>This is a reminder that <strong>{{ deadline_name }}</strong> is due on <strong>{{ deadline_date }}</strong>.</p>
+{% if details %}
+<p>{{ details }}</p>
+{% endif %}
+<p>Please complete it before the deadline.</p>
+{% endblock %}
