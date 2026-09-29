@@ -33,6 +33,7 @@ class Instructor(models.Model):
     name = models.CharField(max_length=30)
     dept_name = models.ForeignKey(Department, on_delete=models.CASCADE)
     salary = models.IntegerField()
+    email = models.EmailField(blank=True)
 
     def __str__(self):
         return self.name
@@ -42,6 +43,7 @@ class Student(models.Model):
     name = models.CharField(max_length=30)
     dept_name = models.ForeignKey(Department, on_delete=models.CASCADE)
     tot_cred = models.IntegerField()
+    email = models.EmailField(blank=True)
 
     def __str__(self):
         return self.name
@@ -104,3 +106,27 @@ class Prereq(models.Model):
 
     class Meta:
         unique_together = ('course_id', 'prereq_id')
+
+
+class NotificationLog(models.Model):
+    STATUS_SENT = 'sent'
+    STATUS_FAILED = 'failed'
+    STATUS_SKIPPED = 'skipped'
+    STATUS_CHOICES = [
+        (STATUS_SENT, 'Sent'),
+        (STATUS_FAILED, 'Failed'),
+        (STATUS_SKIPPED, 'Skipped'),
+    ]
+
+    event = models.CharField(max_length=50, db_index=True)
+    recipients = models.TextField(blank=True)
+    subject = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    error = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+
+    def __str__(self):
+        return f"{self.event} to {self.recipients or '-'} [{self.status}]"
