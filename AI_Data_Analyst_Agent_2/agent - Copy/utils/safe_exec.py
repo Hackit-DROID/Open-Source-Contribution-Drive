@@ -47,6 +47,9 @@ BANNED_ATTRIBUTES: Set[str] = {
     "system", "popen", "spawn"
 }
 
+SANDBOX_WRITE_ATTRIBUTES: Set[str] = {"to_csv", "to_json", "to_html"}
+SANDBOX_WRITE_BUILTINS: Set[str] = {"open"}
+
 # Whitelist of safe Python builtins permitted inside the sandbox
 SAFE_BUILTINS: Dict[str, Any] = {
     "len": len,
@@ -107,6 +110,20 @@ def sanitize_code(code: str) -> str:
 class ASTSecurityInspector(ast.NodeVisitor):
     """AST visitor that validates generated Python code against security policies."""
 
+    def __init__(self, allow_file_writes: bool = False):
+        super().__init__()
+        self.allow_file_writes = allow_file_writes
+
+    def _is_banned_builtin(self, name: str) -> bool:
+        if self.allow_file_writes and name in SANDBOX_WRITE_BUILTINS:
+            return False
+        return name in BANNED_BUILTIN_FUNCS
+
+    def _is_banned_attribute(self, name: str) -> bool:
+        if self.allow_file_writes and name in SANDBOX_WRITE_ATTRIBUTES:
+            return False
+        return name in BANNED_ATTRIBUTES
+
     def visit_Import(self, node: ast.Import) -> None:
         names = [alias.name for alias in node.names]
         raise SecurityViolationError(f"Import statements are prohibited in sandbox: {names}")
@@ -118,7 +135,7 @@ class ASTSecurityInspector(ast.NodeVisitor):
     def visit_Name(self, node: ast.Name) -> None:
         if node.id in BANNED_MODULES:
             raise SecurityViolationError(f"Access to prohibited module/identifier '{node.id}' is blocked")
-        if node.id in BANNED_BUILTIN_FUNCS:
+        if self._is_banned_builtin(node.id):
             raise SecurityViolationError(f"Access to prohibited built-in function '{node.id}' is blocked")
         if node.id.startswith("__"):
             raise SecurityViolationError(f"Dunder identifiers like '{node.id}' are prohibited")
@@ -127,7 +144,7 @@ class ASTSecurityInspector(ast.NodeVisitor):
     def visit_Attribute(self, node: ast.Attribute) -> None:
         if node.attr.startswith("__"):
             raise SecurityViolationError(f"Dunder attribute access '{node.attr}' is prohibited")
-        if node.attr in BANNED_ATTRIBUTES:
+        if self._is_banned_attribute(node.attr):
             raise SecurityViolationError(f"Access to dangerous method/attribute '{node.attr}' is prohibited")
         self.generic_visit(node)
 
@@ -135,11 +152,11 @@ class ASTSecurityInspector(ast.NodeVisitor):
         # Check direct function calls
         if isinstance(node.func, ast.Name):
             func_name = node.func.id
-            if func_name in BANNED_BUILTIN_FUNCS or func_name in BANNED_MODULES:
+            if self._is_banned_builtin(func_name) or func_name in BANNED_MODULES:
                 raise SecurityViolationError(f"Execution of prohibited function '{func_name}' is blocked")
         elif isinstance(node.func, ast.Attribute):
             attr_name = node.func.attr
-            if attr_name in BANNED_ATTRIBUTES or attr_name.startswith("__"):
+            if self._is_banned_attribute(attr_name) or attr_name.startswith("__"):
                 raise SecurityViolationError(f"Execution of prohibited attribute method '{attr_name}' is blocked")
         self.generic_visit(node)
 
@@ -180,7 +197,7 @@ class ASTSecurityInspector(ast.NodeVisitor):
         raise SecurityViolationError("YieldFrom expressions are prohibited in sandbox")
 
 
-def validate_code(code: str) -> ast.AST:
+def validate_code(code: str, allow_file_writes: bool = False) -> ast.AST:
     """Parse and inspect Python code using Abstract Syntax Tree (AST) validation.
 
     Raises:
@@ -192,17 +209,31 @@ def validate_code(code: str) -> ast.AST:
     except SyntaxError as e:
         raise SyntaxError(f"Syntax error in generated code: {e}") from e
 
-    inspector = ASTSecurityInspector()
+    inspector = ASTSecurityInspector(allow_file_writes=allow_file_writes)
     inspector.visit(tree)
     return tree
 
 
-def _run_in_sandbox(tree: ast.AST, df: Any) -> Any:
+def _run_in_sandbox(tree: ast.AST, df: Any, sandbox: Optional[Any] = None) -> Any:
     """Internal runner that executes validated AST inside a restricted namespace."""
+    if sandbox is None:
+        return _evaluate(tree, df, SAFE_BUILTINS, {})
+
+    builtins = dict(SAFE_BUILTINS, open=sandbox.open)
+    extras = {"scratch_path": sandbox.path, "SCRATCH_DIR": sandbox.directory}
+    sandbox.activate()
+    try:
+        return _evaluate(tree, df, builtins, extras)
+    finally:
+        sandbox.deactivate()
+
+
+def _evaluate(tree: ast.AST, df: Any, builtins: Dict[str, Any], extras: Dict[str, Any]) -> Any:
     safe_globals: Dict[str, Any] = {
-        "__builtins__": SAFE_BUILTINS,
+        "__builtins__": builtins,
         "pd": pd,
         "np": np,
+        **extras,
     }
     safe_locals: Dict[str, Any] = {
         "df": df,
@@ -229,7 +260,7 @@ def _run_in_sandbox(tree: ast.AST, df: Any) -> Any:
     return None
 
 
-def execute_safe_code(code: str, df: Any, timeout: float = 5.0) -> Any:
+def execute_safe_code(code: str, df: Any, timeout: float = 5.0, sandbox: Optional[Any] = None) -> Any:
     """Sanitize, validate, and execute Python code in a secure execution sandbox.
 
     Args:
@@ -249,13 +280,13 @@ def execute_safe_code(code: str, df: Any, timeout: float = 5.0) -> Any:
         raise ValueError("Cannot execute empty or null code")
 
     sanitized = sanitize_code(code)
-    tree = validate_code(sanitized)
+    tree = validate_code(sanitized, allow_file_writes=sandbox is not None)
 
     # Execute in a worker thread to enforce timeout bounds
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(_run_in_sandbox, tree, df)
+        future = executor.submit(_run_in_sandbox, tree, df, sandbox)
         try:
-            return future.result(timeout=timeout)
+            result = future.result(timeout=timeout)
         except concurrent.futures.TimeoutError as e:
             raise CodeTimeoutError(f"Code execution exceeded time limit of {timeout}s") from e
         except Exception as e:
@@ -263,3 +294,7 @@ def execute_safe_code(code: str, df: Any, timeout: float = 5.0) -> Any:
             if isinstance(e, SecurityViolationError):
                 raise
             raise e
+
+    if sandbox is not None:
+        sandbox.enforce_quota()
+    return result
