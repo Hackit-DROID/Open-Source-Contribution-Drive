@@ -22,4 +22,5 @@ urlpatterns = [
     path('delete-course/<str:course_id>/', views.delete_course, name='delete_course'),
     path('delete-classroom/<int:id>/', views.delete_classroom, name='delete_classroom'),
     path('delete-section/<int:id>/', views.delete_section, name='delete_section'),
+    path('export/<str:dataset>/', views.export_data, name='export_data'),
 ]

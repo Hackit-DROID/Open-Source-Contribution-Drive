@@ -1,7 +1,20 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import Http404, JsonResponse, StreamingHttpResponse
+from django.views.decorators.http import require_GET
 from .models import *
+from .exporters import (
+    EXPORT_FORMATS,
+    DATASETS,
+    ExportError,
+    build_queryset,
+    export_filename,
+    iter_csv,
+    iter_json,
+    select_columns,
+)
 
 def home(request):
     return render(request, 'portal/home.html')
@@ -192,3 +205,46 @@ def delete_section(request, id):
     Section.objects.get(id=id).delete()
     messages.success(request, 'Section deleted successfully!')
     return redirect('sections_timetable')
+
+
+RESERVED_EXPORT_PARAMS = {'format', 'columns', 'header'}
+
+
+def build_export_response(dataset, queryset, columns, filters, fmt, include_header=True):
+    if fmt == 'csv':
+        response = StreamingHttpResponse(
+            iter_csv(queryset.iterator(chunk_size=500), columns, include_header=include_header),
+            content_type='text/csv; charset=utf-8',
+        )
+    else:
+        response = StreamingHttpResponse(
+            iter_json(queryset, dataset, columns, filters),
+            content_type='application/json',
+        )
+    response['Content-Disposition'] = f'attachment; filename="{export_filename(dataset, fmt)}"'
+    response['X-Export-Dataset'] = dataset.name
+    return response
+
+
+@staff_member_required
+@require_GET
+def export_data(request, dataset):
+    if dataset not in DATASETS:
+        raise Http404(f"Unknown export dataset: {dataset}")
+    spec = DATASETS[dataset]
+
+    fmt = request.GET.get('format', 'csv').lower()
+    if fmt not in EXPORT_FORMATS:
+        return JsonResponse({'error': f"Unsupported format {fmt!r}. Use csv or json."}, status=400)
+
+    include_header = request.GET.get('header', '1').lower() not in ('0', 'false', 'no')
+    column_keys = [key.strip() for key in request.GET.get('columns', '').split(',') if key.strip()]
+    filters = {key: value for key, value in request.GET.items() if key not in RESERVED_EXPORT_PARAMS}
+
+    try:
+        columns = select_columns(spec, column_keys)
+        queryset, applied = build_queryset(spec, filters)
+    except ExportError as exc:
+        return JsonResponse({'error': str(exc)}, status=400)
+
+    return build_export_response(spec, queryset, columns, applied, fmt, include_header)
