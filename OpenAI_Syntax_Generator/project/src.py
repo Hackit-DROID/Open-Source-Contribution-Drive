@@ -238,6 +238,128 @@ print(json.dumps(output))
 
 
 # ---------------------------------------------------------------------------
+# AST Dead Code & Unused Variable Inspector
+# ---------------------------------------------------------------------------
+
+class ASTDeadCodeInspector(ast.NodeVisitor):
+    """AST Inspector detecting unused local variables and dead code statements after return/raise."""
+
+    def __init__(self):
+        self.function_scopes: List[Dict[str, Any]] = []
+        self.unused_variables: List[Dict[str, Any]] = []
+        self.dead_code: List[Dict[str, Any]] = []
+
+    def _scan_body(self, body: Any) -> None:
+        if not isinstance(body, list):
+            return
+        terminator = None
+        for stmt in body:
+            if terminator is not None:
+                stmt_repr = ast.unparse(stmt) if hasattr(ast, 'unparse') else type(stmt).__name__
+                self.dead_code.append({
+                    "line": getattr(stmt, "lineno", -1),
+                    "statement": stmt_repr,
+                    "type": type(stmt).__name__,
+                    "after": type(terminator).__name__,
+                    "message": f"Dead code statement '{type(stmt).__name__}' at line {getattr(stmt, 'lineno', -1)} appears after '{type(terminator).__name__}'."
+                })
+            elif isinstance(stmt, (ast.Return, ast.Raise)):
+                terminator = stmt
+
+    def visit_Module(self, node: ast.Module):
+        self._scan_body(node.body)
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        self._scan_body(node.body)
+        scope = {
+            "name": node.name,
+            "defined": {},
+            "loaded": set()
+        }
+        self.function_scopes.append(scope)
+        self.generic_visit(node)
+        popped = self.function_scopes.pop()
+        for var_name, lineno in popped["defined"].items():
+            if var_name not in popped["loaded"] and not var_name.startswith("_"):
+                self.unused_variables.append({
+                    "name": var_name,
+                    "line": lineno,
+                    "function": popped["name"],
+                    "message": f"Unused variable '{var_name}' defined at line {lineno} in function '{popped['name']}'."
+                })
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
+        self.visit_FunctionDef(node)
+
+    def visit_If(self, node: ast.If):
+        self._scan_body(node.body)
+        self._scan_body(node.orelse)
+        self.generic_visit(node)
+
+    def visit_For(self, node: ast.For):
+        self._scan_body(node.body)
+        self._scan_body(node.orelse)
+        self.generic_visit(node)
+
+    def visit_AsyncFor(self, node: ast.AsyncFor):
+        self._scan_body(node.body)
+        self._scan_body(node.orelse)
+        self.generic_visit(node)
+
+    def visit_While(self, node: ast.While):
+        self._scan_body(node.body)
+        self._scan_body(node.orelse)
+        self.generic_visit(node)
+
+    def visit_Try(self, node: ast.Try):
+        self._scan_body(node.body)
+        self._scan_body(node.orelse)
+        self._scan_body(node.finalbody)
+        self.generic_visit(node)
+
+    def visit_ExceptHandler(self, node: ast.ExceptHandler):
+        self._scan_body(node.body)
+        self.generic_visit(node)
+
+    def visit_With(self, node: ast.With):
+        self._scan_body(node.body)
+        self.generic_visit(node)
+
+    def visit_AsyncWith(self, node: ast.AsyncWith):
+        self._scan_body(node.body)
+        self.generic_visit(node)
+
+    def visit_Name(self, node: ast.Name):
+        if self.function_scopes:
+            current_scope = self.function_scopes[-1]
+            if isinstance(node.ctx, ast.Store):
+                if node.id not in current_scope["defined"]:
+                    current_scope["defined"][node.id] = getattr(node, "lineno", -1)
+            elif isinstance(node.ctx, ast.Load):
+                for sc in self.function_scopes:
+                    sc["loaded"].add(node.id)
+        self.generic_visit(node)
+
+    @classmethod
+    def inspect(cls, code_str: str) -> Dict[str, Any]:
+        """Parses python code AST and detects unused variables and dead code statements."""
+        try:
+            tree = ast.parse(code_str)
+        except SyntaxError as syn_err:
+            raise SecurityValidationError(f"Invalid Python syntax: {syn_err}") from syn_err
+
+        inspector = cls()
+        inspector.visit(tree)
+        return {
+            "unused_variables": inspector.unused_variables,
+            "dead_code": inspector.dead_code,
+            "has_dead_code": len(inspector.dead_code) > 0,
+            "has_unused_variables": len(inspector.unused_variables) > 0,
+        }
+
+
+# ---------------------------------------------------------------------------
 # OpenAI Syntax Generator Helper
 # ---------------------------------------------------------------------------
 
