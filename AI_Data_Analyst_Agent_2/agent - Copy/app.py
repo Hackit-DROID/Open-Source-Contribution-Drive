@@ -6,6 +6,7 @@ import pandas as pd
 from utils.llm import generate_pandas_code, explain_result
 from utils.charts import generate_charts
 from utils.data import apply_filters
+from utils.scaler import MinMaxScaler, min_max_scale_column
 from utils.safe_exec import execute_safe_code, SecurityViolationError, CodeTimeoutError, sanitize_code
 from utils.concurrency import VersionedStore, VersionedEntity, RetryExhaustedError, retry_on_conflict
 from utils.file_sandbox import (
@@ -336,6 +337,28 @@ def update_record(row):
         "version": entity.version,
         "status": "success"
     })
+
+
+@app.route("/normalize", methods=["POST"])
+def normalize_data():
+    global df_global
+    if df_global is None:
+        return jsonify({"error": "No dataset uploaded yet.", "status": "error"}), 400
+
+    payload = request.get_json(silent=True) or {}
+    columns = payload.get("columns", None)
+
+    try:
+        scaler = MinMaxScaler()
+        scaled_df, stats = scaler.fit_transform(df_global, columns=columns)
+        return jsonify({
+            "status": "success",
+            "columns_scaled": list(stats.keys()),
+            "stats": stats,
+            "sample": scaled_df.head(10).to_dict(orient="records"),
+        })
+    except ValueError as e:
+        return jsonify({"error": str(e), "status": "error"}), 400
 
 
 if __name__ == "__main__":
