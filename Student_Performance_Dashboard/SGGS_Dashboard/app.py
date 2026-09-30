@@ -174,6 +174,98 @@ def attendance_alerts():
     """)
     return jsonify([dict(r) for r in rows])
 
+# ─── Correlation Analytics (CR-637) ──────────────────────────────────────────
+
+def compute_pearson_correlation(x_vals, y_vals):
+    """Computes Pearson correlation coefficient between two numeric sequences."""
+    if len(x_vals) < 2 or len(x_vals) != len(y_vals):
+        return 0.0
+    try:
+        import numpy as np
+        arr_x = np.array(x_vals, dtype=float)
+        arr_y = np.array(y_vals, dtype=float)
+        if np.std(arr_x) == 0 or np.std(arr_y) == 0:
+            return 0.0
+        corr = np.corrcoef(arr_x, arr_y)[0, 1]
+        return float(corr) if not np.isnan(corr) else 0.0
+    except ImportError:
+        import math
+        n = len(x_vals)
+        mean_x = sum(x_vals) / n
+        mean_y = sum(y_vals) / n
+        diff_x = [x - mean_x for x in x_vals]
+        diff_y = [y - mean_y for y in y_vals]
+        denom = math.sqrt(sum(d * d for d in diff_x) * sum(d * d for d in diff_y))
+        if denom == 0:
+            return 0.0
+        return sum(dx * dy for dx, dy in zip(diff_x, diff_y)) / denom
+
+
+def get_attendance_performance_correlation(branch=None):
+    """
+    Computes correlation coefficient between attendance percentage and score,
+    generates scatter plot data, and identifies high-risk students (<75% attendance AND <50% marks).
+    """
+    params = []
+    where_clause = ""
+    if branch:
+        where_clause = "WHERE s.branch = ?"
+        params.append(branch)
+
+    sql = f"""
+        SELECT s.id as student_id, s.name, s.roll_no, s.branch,
+               ROUND(AVG(a.percentage), 2) as attendance_percentage,
+               ROUND(AVG(m.total), 2) as marks_avg
+        FROM students s
+        JOIN attendance a ON s.id = a.student_id
+        JOIN marks m ON s.id = m.student_id
+        {where_clause}
+        GROUP BY s.id
+        ORDER BY s.roll_no ASC
+    """
+    rows = query_db(sql, params)
+    scatter_data = []
+    risk_students = []
+    attendance_vals = []
+    marks_vals = []
+
+    for r in rows:
+        att = float(r['attendance_percentage'] or 0.0)
+        marks = float(r['marks_avg'] or 0.0)
+        is_risk = att < 75.0 and marks < 50.0
+
+        item = {
+            'student_id': r['student_id'],
+            'name': r['name'],
+            'roll_no': r['roll_no'],
+            'branch': r['branch'],
+            'attendance_percentage': att,
+            'marks_avg': marks,
+            'is_risk': is_risk,
+        }
+        scatter_data.append(item)
+        if is_risk:
+            risk_students.append(item)
+        attendance_vals.append(att)
+        marks_vals.append(marks)
+
+    corr = compute_pearson_correlation(attendance_vals, marks_vals)
+
+    return {
+        'correlation_coefficient': round(corr, 4),
+        'scatter_plot_data': scatter_data,
+        'risk_students': risk_students,
+        'total_analyzed': len(scatter_data),
+        'risk_count': len(risk_students),
+    }
+
+
+@app.route('/api/attendance_performance_correlation')
+def attendance_performance_correlation():
+    branch = request.args.get('branch', '')
+    data = get_attendance_performance_correlation(branch=branch)
+    return jsonify(data)
+
 # ─── Main ────────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
