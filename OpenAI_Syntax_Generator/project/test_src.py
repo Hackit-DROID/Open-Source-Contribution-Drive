@@ -6,6 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from src import (
     ASTSecurityInspector,
+    ASTDeadCodeInspector,
     SQLQuerySanitizer,
     SecureSandboxExecutor,
     SecurityValidationError,
@@ -121,6 +122,106 @@ result = sum(squared)
         res = SecureSandboxExecutor.execute_python(safe_code)
         self.assertEqual(res.get("status"), "SUCCESS")
         self.assertEqual(res.get("result"), "55")
+
+
+# -----------------------------------------------------------------------
+# 4. AST Dead Code and Unused Variable Inspector Tests (CR-860)
+# -----------------------------------------------------------------------
+
+class ASTDeadCodeInspectorTest(unittest.TestCase):
+    """Test suite verifying detection of unused variables and dead code statements."""
+
+    def test_detects_unused_variables_in_functions(self):
+        """Verify inspector identifies variables defined in a function that are never referenced."""
+        code = """
+def process_data(val):
+    temp_unused = val * 10
+    active_calc = val + 5
+    result = active_calc * 2
+    return result
+"""
+        res = ASTDeadCodeInspector.inspect(code)
+        self.assertTrue(res["has_unused_variables"])
+        unused_names = [v["name"] for v in res["unused_variables"]]
+        self.assertIn("temp_unused", unused_names)
+        self.assertNotIn("active_calc", unused_names)
+        self.assertNotIn("result", unused_names)
+
+    def test_no_false_positive_when_variables_used(self):
+        """Verify clean code with all variables referenced produces zero unused variable flags."""
+        code = """
+def calculate(a, b):
+    total = a + b
+    factor = 2
+    return total * factor
+"""
+        res = ASTDeadCodeInspector.inspect(code)
+        self.assertFalse(res["has_unused_variables"])
+        self.assertEqual(len(res["unused_variables"]), 0)
+
+    def test_detects_dead_code_after_return(self):
+        """Verify statements appearing after a return statement are flagged as dead code."""
+        code = """
+def fetch_status():
+    status = "OK"
+    return status
+    print("This is unreachable log")
+    status = "ERROR"
+"""
+        res = ASTDeadCodeInspector.inspect(code)
+        self.assertTrue(res["has_dead_code"])
+        self.assertEqual(len(res["dead_code"]), 2)
+        statements = [d["type"] for d in res["dead_code"]]
+        self.assertIn("Expr", statements)
+        self.assertIn("Assign", statements)
+        self.assertEqual(res["dead_code"][0]["after"], "Return")
+
+    def test_detects_dead_code_after_raise(self):
+        """Verify statements appearing after a raise statement are flagged as dead code."""
+        code = """
+def validate_age(age):
+    if age < 0:
+        raise ValueError("Negative age")
+        age = 0
+    return age
+"""
+        res = ASTDeadCodeInspector.inspect(code)
+        self.assertTrue(res["has_dead_code"])
+        self.assertEqual(len(res["dead_code"]), 1)
+        self.assertEqual(res["dead_code"][0]["type"], "Assign")
+        self.assertEqual(res["dead_code"][0]["after"], "Raise")
+
+    def test_no_dead_code_in_valid_branching(self):
+        """Verify legitimate if/else branching with returns in separate paths has no dead code."""
+        code = """
+def compute_sign(x):
+    if x > 0:
+        return 1
+    elif x < 0:
+        return -1
+    else:
+        return 0
+"""
+        res = ASTDeadCodeInspector.inspect(code)
+        self.assertFalse(res["has_dead_code"])
+        self.assertEqual(len(res["dead_code"]), 0)
+
+    def test_detects_both_unused_variables_and_dead_code(self):
+        """Verify code containing both dead code and unused variables flags both."""
+        code = """
+def complex_fn(x):
+    unused_debug_metric = 999
+    res = x + 1
+    return res
+    extra_metric = 123
+"""
+        res = ASTDeadCodeInspector.inspect(code)
+        self.assertTrue(res["has_unused_variables"])
+        self.assertTrue(res["has_dead_code"])
+        unused_names = [v["name"] for v in res["unused_variables"]]
+        self.assertIn("unused_debug_metric", unused_names)
+        self.assertIn("extra_metric", unused_names)
+        self.assertEqual(len(res["dead_code"]), 1)
 
 
 if __name__ == "__main__":
