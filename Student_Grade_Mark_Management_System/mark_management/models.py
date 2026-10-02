@@ -72,6 +72,33 @@ class Marks(db.Model):
         return f'<Marks {self.subject} | Total: {self.total()}>'
 
 
+class NotificationLog(db.Model):
+    __tablename__ = 'notification_logs'
+
+    STATUS_PENDING = 'pending'
+    STATUS_SENT = 'sent'
+    STATUS_FAILED = 'failed'
+    STATUS_SKIPPED = 'skipped'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id', ondelete='SET NULL'), nullable=True)
+    event = db.Column(db.String(50), nullable=False, index=True)
+    recipient = db.Column(db.String(120), nullable=False, default='')
+    subject = db.Column(db.String(255), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default=STATUS_PENDING)
+    error = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    sent_at = db.Column(db.DateTime, nullable=True)
+
+    def mark_sent(self):
+        self.status = self.STATUS_SENT
+        self.sent_at = datetime.utcnow()
+        self.error = None
+
+    def __repr__(self):
+        return f'<NotificationLog {self.event} -> {self.recipient} [{self.status}]>'
+
+
 # ──────────────────────────────────────────────
 # 📋 Constants
 # ──────────────────────────────────────────────

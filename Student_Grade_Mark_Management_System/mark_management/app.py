@@ -5,9 +5,13 @@ Marksheet Management System
 """
 
 import os
+import click
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash
 from dotenv import load_dotenv
 from models import db, Student, Marks, BRANCHES, YEARS, SUBJECTS
+from notifications import (notifications, notify_student_registered, notify_marks_published,
+                           notify_academic_alert, notify_marks_pending)
 from opencode.llm import OpenCodeLLM
 from collections import defaultdict
 
@@ -28,18 +32,57 @@ GRADE_A_THRESHOLD = 70
 GRADE_B_PLUS_THRESHOLD = 60
 GRADE_B_THRESHOLD = 50
 GRADE_C_THRESHOLD = 40
+MARKS_REMINDER_DAYS_DEFAULT = 7
 
 # ── Initialize Flask ──
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///marks.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///marks.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', SECRET_KEY_DEFAULT)
+app.config['MAIL_BACKEND'] = os.getenv('MAIL_BACKEND', 'console')
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'localhost')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', '587'))
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'true').lower() == 'true'
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@marksheet.local')
+app.config['NOTIFICATIONS_ENABLED'] = os.getenv('NOTIFICATIONS_ENABLED', 'true').lower() == 'true'
+app.config['NOTIFICATIONS_ASYNC'] = os.getenv('NOTIFICATIONS_ASYNC', 'true').lower() == 'true'
+app.config['APP_BASE_URL'] = os.getenv('APP_BASE_URL', f'http://localhost:{DEFAULT_PORT}')
 
 # ── Initialize DB ──
 db.init_app(app)
+notifications.init_app(app)
 
 # ── Initialize LLM ──
 llm = OpenCodeLLM()
+
+
+def compute_overall_grade(percentage):
+    if percentage >= GRADE_O_THRESHOLD:        return 'O'
+    elif percentage >= GRADE_A_PLUS_THRESHOLD: return 'A+'
+    elif percentage >= GRADE_A_THRESHOLD:      return 'A'
+    elif percentage >= GRADE_B_PLUS_THRESHOLD: return 'B+'
+    elif percentage >= GRADE_B_THRESHOLD:      return 'B'
+    elif percentage >= GRADE_C_THRESHOLD:      return 'C'
+    return 'F'
+
+
+def build_marks_summary(marks):
+    total = sum(m.total() for m in marks)
+    percentage = (total / (len(marks) * 100)) * 100 if marks else 0
+    return {
+        'total': total,
+        'max_total': len(marks) * 100,
+        'percentage': round(percentage, 2),
+        'overall_grade': compute_overall_grade(percentage),
+        'result': 'Pass' if marks and all(m.is_pass() for m in marks) else 'Fail',
+        'subjects': [
+            {'subject': m.subject, 'total': m.total(), 'grade': m.grade(), 'passed': m.is_pass()}
+            for m in marks
+        ],
+        'failed_subjects': [m.subject for m in marks if not m.is_pass()],
+    }
 
 
 # ════════════════════════════════════════════════
@@ -85,6 +128,7 @@ def add_student():
         student = Student(name=name, roll_no=roll_no, branch=branch, year=year, email=email)
         db.session.add(student)
         db.session.commit()
+        notify_student_registered(student)
 
         flash(f'✅ Student "{name}" registered successfully! Now add their marks.', 'success')
         return redirect(url_for('add_marks', student_id=student.id))
@@ -148,6 +192,13 @@ def add_marks(student_id):
             db.session.add(mark)
 
         db.session.commit()
+
+        saved_marks = Marks.query.filter_by(student_id=student_id).all()
+        summary = build_marks_summary(saved_marks)
+        notify_marks_published(student, summary)
+        if summary['failed_subjects']:
+            notify_academic_alert(student, summary)
+
         flash(f'✅ Marks saved for {student.name}!', 'success')
         return redirect(url_for('report', student_id=student_id))
 
@@ -177,13 +228,7 @@ def report(student_id):
     percentage = (total / (len(marks) * 100)) * 100
 
     # Overall grade
-    if percentage >= GRADE_O_THRESHOLD:        overall_grade = 'O'
-    elif percentage >= GRADE_A_PLUS_THRESHOLD: overall_grade = 'A+'
-    elif percentage >= GRADE_A_THRESHOLD:      overall_grade = 'A'
-    elif percentage >= GRADE_B_PLUS_THRESHOLD: overall_grade = 'B+'
-    elif percentage >= GRADE_B_THRESHOLD:      overall_grade = 'B'
-    elif percentage >= GRADE_C_THRESHOLD:      overall_grade = 'C'
-    else:                                      overall_grade = 'F'
+    overall_grade = compute_overall_grade(percentage)
 
     # Pass/Fail — all subjects must pass
     result = 'Pass' if all(m.is_pass() for m in marks) else 'Fail'
@@ -372,6 +417,31 @@ def delete_student(student_id):
     db.session.commit()
     flash(f'🗑️ Student "{name}" has been deleted.', 'danger')
     return redirect(url_for('students_list'))
+
+
+def find_students_pending_marks(days):
+    cutoff = datetime.utcnow() - timedelta(days=days)
+    return (Student.query
+            .filter(Student.created_at <= cutoff)
+            .filter(~Student.marks.any())
+            .all())
+
+
+def send_marks_pending_reminders(days=MARKS_REMINDER_DAYS_DEFAULT):
+    now = datetime.utcnow()
+    students = find_students_pending_marks(days)
+    for student in students:
+        days_waiting = (now - student.created_at).days if student.created_at else days
+        notify_marks_pending(student, days_waiting)
+    return len(students)
+
+
+@app.cli.command('send-reminders')
+@click.option('--days', default=MARKS_REMINDER_DAYS_DEFAULT, show_default=True, type=int)
+def send_reminders_command(days):
+    count = send_marks_pending_reminders(days)
+    notifications.flush()
+    click.echo(f'Queued marks-pending reminders for {count} student(s).')
 
 
 # ════════════════════════════════════════════════

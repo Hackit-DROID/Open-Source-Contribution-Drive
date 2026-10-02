@@ -1,0 +1,6 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p>Hi {{ name }},</p>
+<p>Your marks for roll number <strong>{{ roll_no }}</strong> have not been published yet, {{ days_waiting }} day(s) after registration.</p>
+<p>If you believe this is a mistake, please contact the examination office.</p>
+{% endblock %}
