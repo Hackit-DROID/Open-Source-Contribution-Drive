@@ -49,3 +49,13 @@ def delete_stock(request, pk):
         stock.delete()
         return redirect('stock_list')
     return render(request, 'inventory/stock_delete.html', {'stock': stock})
+
+
+def stock_sharing_summary_view(request):
+    """API endpoint returning multi-hospital blood stock sharing balance summary."""
+    from django.http import JsonResponse
+    from .stock_sharing import BloodStockSharingLedger
+
+    ledger = BloodStockSharingLedger()
+    summary = ledger.get_network_summary()
+    return JsonResponse({"status": "success", "data": summary})
