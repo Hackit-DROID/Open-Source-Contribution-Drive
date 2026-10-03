@@ -1,0 +1,11 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p>Hi {{ name }},</p>
+<p>Your student profile has been created successfully.</p>
+<table role="presentation" cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
+  <tr><td><strong>Roll No</strong></td><td>{{ roll_no }}</td></tr>
+  <tr><td><strong>Branch</strong></td><td>{{ branch }}</td></tr>
+  <tr><td><strong>Year</strong></td><td>{{ year }}</td></tr>
+</table>
+<p>You will receive another email as soon as your marks are published.</p>
+{% endblock %}

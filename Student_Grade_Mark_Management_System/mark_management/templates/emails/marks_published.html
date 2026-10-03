@@ -1,0 +1,25 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<p>Hi {{ name }},</p>
+<p>Your marks for roll number <strong>{{ roll_no }}</strong> have been published.</p>
+<table role="presentation" width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;border:1px solid #e5e7eb;">
+  <tr style="background:#f3f4f6;">
+    <th align="left">Subject</th>
+    <th align="right">Total</th>
+    <th align="center">Grade</th>
+  </tr>
+  {% for row in subjects %}
+  <tr style="border-top:1px solid #e5e7eb;{% if not row.passed %}color:#b91c1c;{% endif %}">
+    <td>{{ row.subject }}</td>
+    <td align="right">{{ row.total }}/100</td>
+    <td align="center">{{ row.grade }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<p>
+  <strong>Total:</strong> {{ total }}/{{ max_total }} ({{ '%.2f'|format(percentage) }}%)<br>
+  <strong>Overall Grade:</strong> {{ overall_grade }}<br>
+  <strong>Result:</strong> <span style="color:{{ '#15803d' if result == 'Pass' else '#b91c1c' }};font-weight:bold;">{{ result }}</span>
+</p>
+<p><a href="{{ report_url }}" style="display:inline-block;background:#4f46e5;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;">View full report</a></p>
+{% endblock %}
