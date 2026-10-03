@@ -91,3 +91,17 @@ def add_donation(request):
     else:
         form = DonationForm()
     return render(request, 'donations/add_donation.html', {'form': form})
+
+
+def donor_retention_analytics_view(request):
+    """API view computing repeat donor ratio and re-donation interval analytics."""
+    from django.http import JsonResponse
+    from .donor_retention import DonorRetentionAnalyticsEngine
+
+    engine = DonorRetentionAnalyticsEngine()
+    donations = Donation.objects.all().values('donor_id', 'donation_date')
+    for d in donations:
+        engine.record_donation(d['donor_id'], d['donation_date'])
+
+    metrics = engine.compute_metrics()
+    return JsonResponse({"status": "success", "data": metrics.to_dict()})
