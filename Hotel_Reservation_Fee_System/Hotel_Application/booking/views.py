@@ -46,3 +46,30 @@ def conference_event_pricing_view(request):
             "equipment_fee": equipment_fee,
         },
     })
+
+
+def dynamic_pricing_quote_view(request):
+    """API endpoint to calculate dynamic room pricing with seasonal and weekend surges."""
+    from .seasonal_pricing import DynamicRoomPricingEngine
+
+    try:
+        base_rate = float(request.GET.get('base_rate', 100.0))
+        check_in = request.GET.get('check_in', '2026-10-15')
+        check_out = request.GET.get('check_out', '2026-10-18')
+    except (ValueError, TypeError):
+        return JsonResponse({"error": "Invalid pricing parameters provided."}, status=400)
+
+    engine = DynamicRoomPricingEngine()
+    try:
+        quote = engine.calculate_reservation_quote(
+            check_in=check_in,
+            check_out=check_out,
+            base_rate=base_rate,
+        )
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({
+        "status": "success",
+        "quote": quote.to_dict(),
+    })
