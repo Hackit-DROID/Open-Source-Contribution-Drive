@@ -10,6 +10,8 @@ from src import (
     SQLQuerySanitizer,
     SecureSandboxExecutor,
     SecurityValidationError,
+    OfflineCodeTemplateGenerator,
+    generate_and_execute_syntax,
 )
 
 
@@ -222,6 +224,89 @@ def complex_fn(x):
         self.assertIn("unused_debug_metric", unused_names)
         self.assertIn("extra_metric", unused_names)
         self.assertEqual(len(res["dead_code"]), 1)
+
+
+class OfflineCodeTemplateGeneratorTest(unittest.TestCase):
+    """Test suite verifying offline code template generator & syntax snippet library (CR-631)."""
+
+    def test_offline_template_returned_when_api_key_unconfigured(self):
+        """Verify generate_and_execute_syntax returns offline template when API key is missing."""
+        result = generate_and_execute_syntax("write a python function to add numbers", api_key=None)
+        self.assertEqual(result["status"], "OFFLINE_TEMPLATE")
+        self.assertTrue(result["offline"])
+        self.assertEqual(result["language"], "python")
+        self.assertIn("def ", result["code"])
+        self.assertIn("OPENAI_API_KEY is not configured", result["message"])
+
+    def test_offline_template_disabled_returns_error(self):
+        """Verify returns ERROR when allow_offline=False and API key is missing."""
+        result = generate_and_execute_syntax("any prompt", api_key=None, allow_offline=False)
+        self.assertEqual(result["status"], "ERROR")
+        self.assertIn("OPENAI_API_KEY not configured", result["error"])
+
+    def test_python_template_patterns_and_rendering(self):
+        """Verify python template patterns (function, class, list comprehension)."""
+        fn_res = OfflineCodeTemplateGenerator.render_template("create a python function")
+        self.assertEqual(fn_res["language"], "python")
+        self.assertEqual(fn_res["pattern"], "function")
+        self.assertIn("def calculate_total", fn_res["code"])
+
+        cls_res = OfflineCodeTemplateGenerator.render_template("python oop class")
+        self.assertEqual(cls_res["language"], "python")
+        self.assertEqual(cls_res["pattern"], "class")
+        self.assertIn("class DataProcessor", cls_res["code"])
+
+        comp_res = OfflineCodeTemplateGenerator.render_template("python list comprehension")
+        self.assertEqual(comp_res["language"], "python")
+        self.assertEqual(comp_res["pattern"], "list_comp")
+        self.assertIn("result = [x * 2", comp_res["code"])
+
+    def test_javascript_template_patterns_and_rendering(self):
+        """Verify javascript template patterns (fetch, express, default)."""
+        fetch_res = OfflineCodeTemplateGenerator.render_template("javascript async fetch api request")
+        self.assertEqual(fetch_res["language"], "javascript")
+        self.assertEqual(fetch_res["pattern"], "fetch")
+        self.assertIn("async function fetchResource", fetch_res["code"])
+
+        express_res = OfflineCodeTemplateGenerator.render_template("js express router route")
+        self.assertEqual(express_res["language"], "javascript")
+        self.assertEqual(express_res["pattern"], "express")
+        self.assertIn("express.Router()", express_res["code"])
+
+    def test_sql_template_patterns_and_rendering(self):
+        """Verify SQL template patterns (select, join, create table)."""
+        sel_res = OfflineCodeTemplateGenerator.render_template("sql select query")
+        self.assertEqual(sel_res["language"], "sql")
+        self.assertEqual(sel_res["pattern"], "select")
+        self.assertIn("SELECT id, name", sel_res["code"])
+
+        join_res = OfflineCodeTemplateGenerator.render_template("sql inner join query")
+        self.assertEqual(join_res["language"], "sql")
+        self.assertEqual(join_res["pattern"], "join")
+        self.assertIn("JOIN users", join_res["code"])
+
+        table_res = OfflineCodeTemplateGenerator.render_template("create table schema in sql")
+        self.assertEqual(table_res["language"], "sql")
+        self.assertEqual(table_res["pattern"], "create")
+        self.assertIn("CREATE TABLE IF NOT EXISTS", table_res["code"])
+
+    def test_html_template_patterns_and_rendering(self):
+        """Verify HTML template patterns (form, table, default boilerplate)."""
+        form_res = OfflineCodeTemplateGenerator.render_template("html form submit input")
+        self.assertEqual(form_res["language"], "html")
+        self.assertEqual(form_res["pattern"], "form")
+        self.assertIn("<form", form_res["code"])
+        self.assertIn("<input", form_res["code"])
+
+        table_res = OfflineCodeTemplateGenerator.render_template("html data table layout")
+        self.assertEqual(table_res["language"], "html")
+        self.assertEqual(table_res["pattern"], "table")
+        self.assertIn("<table", table_res["code"])
+
+        bp_res = OfflineCodeTemplateGenerator.render_template("html web page markup")
+        self.assertEqual(bp_res["language"], "html")
+        self.assertEqual(bp_res["pattern"], "default")
+        self.assertIn("<!DOCTYPE html>", bp_res["code"])
 
 
 if __name__ == "__main__":

@@ -360,13 +360,215 @@ class ASTDeadCodeInspector(ast.NodeVisitor):
 
 
 # ---------------------------------------------------------------------------
+# Offline Code Template Generator & Syntax Snippet Library (CR-631)
+# ---------------------------------------------------------------------------
+
+class OfflineCodeTemplateGenerator:
+    """Offline code snippet engine matching request keywords to language templates."""
+
+    TEMPLATES = {
+        "python": {
+            "function": (
+                "def calculate_total(items, tax_rate=0.05):\n"
+                "    \"\"\"Calculates total amount including tax.\"\"\"\n"
+                "    subtotal = sum(item.get('price', 0) for item in items)\n"
+                "    return round(subtotal * (1 + tax_rate), 2)"
+            ),
+            "class": (
+                "class DataProcessor:\n"
+                "    \"\"\"Processes and filters structured dataset records.\"\"\"\n"
+                "    def __init__(self, records=None):\n"
+                "        self.records = records or []\n\n"
+                "    def get_active(self):\n"
+                "        return [r for r in self.records if r.get('active', True)]"
+            ),
+            "list_comp": (
+                "# Python list comprehension pattern\n"
+                "numbers = [1, 2, 3, 4, 5, 6]\n"
+                "result = [x * 2 for x in numbers if x % 2 == 0]"
+            ),
+            "default": (
+                "def main():\n"
+                "    \"\"\"Standard Python boilerplate entrypoint.\"\"\"\n"
+                "    print('Executing offline Python template')\n"
+                "    return True\n\n"
+                "if __name__ == '__main__':\n"
+                "    main()"
+            ),
+        },
+        "javascript": {
+            "fetch": (
+                "async function fetchResource(url) {\n"
+                "    try {\n"
+                "        const response = await fetch(url);\n"
+                "        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);\n"
+                "        return await response.json();\n"
+                "    } catch (err) {\n"
+                "        console.error('Fetch failed:', err);\n"
+                "        throw err;\n"
+                "    }\n"
+                "}"
+            ),
+            "express": (
+                "const express = require('express');\n"
+                "const router = express.Router();\n\n"
+                "router.get('/api/resource', (req, res) => {\n"
+                "    res.json({ status: 'success', data: [] });\n"
+                "});\n\n"
+                "module.exports = router;"
+            ),
+            "default": (
+                "function processData(items) {\n"
+                "    // JavaScript data transformation snippet\n"
+                "    return items.filter(x => Boolean(x)).map(x => x.trim());\n"
+                "}"
+            ),
+        },
+        "sql": {
+            "select": (
+                "SELECT id, name, email, created_at\n"
+                "FROM users\n"
+                "WHERE status = 'ACTIVE'\n"
+                "ORDER BY created_at DESC;"
+            ),
+            "join": (
+                "SELECT o.id AS order_id, u.name AS user_name, o.total_amount\n"
+                "FROM orders o\n"
+                "JOIN users u ON o.user_id = u.id\n"
+                "WHERE o.status = 'COMPLETED';"
+            ),
+            "create": (
+                "CREATE TABLE IF NOT EXISTS items (\n"
+                "    id SERIAL PRIMARY KEY,\n"
+                "    title VARCHAR(255) NOT NULL,\n"
+                "    price NUMERIC(10, 2) NOT NULL,\n"
+                "    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n"
+                ");"
+            ),
+            "default": (
+                "SELECT * FROM records LIMIT 100;"
+            ),
+        },
+        "html": {
+            "form": (
+                "<form action=\"/submit\" method=\"POST\" class=\"form-container\">\n"
+                "    <label for=\"name\">Name:</label>\n"
+                "    <input type=\"text\" id=\"name\" name=\"name\" required />\n"
+                "    <label for=\"email\">Email:</label>\n"
+                "    <input type=\"email\" id=\"email\" name=\"email\" required />\n"
+                "    <button type=\"submit\">Submit</button>\n"
+                "</form>"
+            ),
+            "table": (
+                "<table class=\"data-table\">\n"
+                "    <thead>\n"
+                "        <tr><th>ID</th><th>Name</th><th>Status</th></tr>\n"
+                "    </thead>\n"
+                "    <tbody>\n"
+                "        <tr><td>1</td><td>Sample Item</td><td>Active</td></tr>\n"
+                "    </tbody>\n"
+                "</table>"
+            ),
+            "default": (
+                "<!DOCTYPE html>\n"
+                "<html lang=\"en\">\n"
+                "<head>\n"
+                "    <meta charset=\"UTF-8\">\n"
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                "    <title>Offline HTML Template</title>\n"
+                "</head>\n"
+                "<body>\n"
+                "    <h1>Welcome</h1>\n"
+                "</body>\n"
+                "</html>"
+            ),
+        },
+    }
+
+    @classmethod
+    def detect_language(cls, prompt: str) -> str:
+        """Infers language from request prompt keywords."""
+        p_lower = prompt.lower()
+        if any(k in p_lower for k in ["select", "join", "sql", "query", "database", "insert into", "create table"]):
+            return "sql"
+        if any(k in p_lower for k in ["html", "<form", "<div", "<table", "markup", "web page", "dom"]):
+            return "html"
+        if any(k in p_lower for k in ["javascript", "js", "fetch", "node", "express", "react", "async function"]):
+            return "javascript"
+        return "python"
+
+    @classmethod
+    def render_template(cls, prompt: str, language: Optional[str] = None) -> Dict[str, Any]:
+        """Matches request keywords and returns rendered boilerplate code."""
+        lang = language.lower() if language else cls.detect_language(prompt)
+        if lang not in cls.TEMPLATES:
+            lang = "python"
+
+        p_lower = prompt.lower()
+        templates_for_lang = cls.TEMPLATES[lang]
+        matched_pattern = "default"
+
+        if lang == "python":
+            if any(k in p_lower for k in ["class", "oop", "object"]):
+                matched_pattern = "class"
+            elif any(k in p_lower for k in ["list", "comprehension", "filter"]):
+                matched_pattern = "list_comp"
+            elif any(k in p_lower for k in ["function", "def", "calculate"]):
+                matched_pattern = "function"
+        elif lang == "javascript":
+            if any(k in p_lower for k in ["fetch", "api", "request", "http", "async"]):
+                matched_pattern = "fetch"
+            elif any(k in p_lower for k in ["express", "router", "route", "server"]):
+                matched_pattern = "express"
+        elif lang == "sql":
+            if any(k in p_lower for k in ["join", "inner join", "left join"]):
+                matched_pattern = "join"
+            elif any(k in p_lower for k in ["create", "table", "schema"]):
+                matched_pattern = "create"
+            elif any(k in p_lower for k in ["select", "query", "find"]):
+                matched_pattern = "select"
+        elif lang == "html":
+            if any(k in p_lower for k in ["form", "input", "submit"]):
+                matched_pattern = "form"
+            elif any(k in p_lower for k in ["table", "grid", "rows"]):
+                matched_pattern = "table"
+
+        rendered_code = templates_for_lang.get(matched_pattern, templates_for_lang["default"])
+
+        return {
+            "status": "SUCCESS",
+            "language": lang,
+            "pattern": matched_pattern,
+            "code": rendered_code,
+            "offline": True,
+        }
+
+
+# ---------------------------------------------------------------------------
 # OpenAI Syntax Generator Helper
 # ---------------------------------------------------------------------------
 
-def generate_and_execute_syntax(prompt: str, api_key: Optional[str] = None) -> Dict[str, Any]:
-    """Generates syntax from OpenAI model and executes inside Secure Sandbox."""
+def generate_and_execute_syntax(
+    prompt: str,
+    api_key: Optional[str] = None,
+    allow_offline: bool = True,
+) -> Dict[str, Any]:
+    """
+    Generates syntax from OpenAI model and executes inside Secure Sandbox.
+    If API key is unconfigured and allow_offline is True, returns an offline code template.
+    """
     key = api_key or os.getenv("OPENAI_API_KEY")
     if not key:
+        if allow_offline:
+            offline_result = OfflineCodeTemplateGenerator.render_template(prompt)
+            return {
+                "status": "OFFLINE_TEMPLATE",
+                "language": offline_result["language"],
+                "pattern": offline_result["pattern"],
+                "code": offline_result["code"],
+                "offline": True,
+                "message": "Returned offline code template because OPENAI_API_KEY is not configured.",
+            }
         return {"status": "ERROR", "error": "OPENAI_API_KEY not configured."}
 
     try:
@@ -381,6 +583,7 @@ def generate_and_execute_syntax(prompt: str, api_key: Optional[str] = None) -> D
         return SecureSandboxExecutor.execute_python(generated_code)
     except Exception as exc:
         return {"status": "ERROR", "error": str(exc)}
+
 
 
 if __name__ == "__main__":
