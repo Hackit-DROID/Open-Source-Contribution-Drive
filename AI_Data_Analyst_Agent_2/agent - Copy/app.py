@@ -7,6 +7,7 @@ from utils.llm import generate_pandas_code, explain_result
 from utils.charts import generate_charts
 from utils.data import apply_filters
 from utils.scaler import MinMaxScaler, min_max_scale_column
+from utils.encoder import LabelEncoder, OneHotEncoder, CategoricalFeatureEncoder
 from utils.safe_exec import execute_safe_code, SecurityViolationError, CodeTimeoutError, sanitize_code
 from utils.concurrency import VersionedStore, VersionedEntity, RetryExhaustedError, retry_on_conflict
 from utils.file_sandbox import (
@@ -357,6 +358,51 @@ def normalize_data():
             "stats": stats,
             "sample": scaled_df.head(10).to_dict(orient="records"),
         })
+    except ValueError as e:
+        return jsonify({"error": str(e), "status": "error"}), 400
+
+
+@app.route("/encode", methods=["POST"])
+def encode_data():
+    """Encodes categorical columns into Label Encoded integers or One-Hot vectors (CR-856)."""
+    global df_global
+    if df_global is None:
+        return jsonify({"error": "No dataset uploaded yet.", "status": "error"}), 400
+
+    payload = request.get_json(silent=True) or {}
+    columns = payload.get("columns", [])
+    encoding_type = payload.get("encoding_type", "one_hot").lower()
+
+    if not columns:
+        return jsonify({"error": "Columns list must be specified.", "status": "error"}), 400
+
+    try:
+        if encoding_type == "label":
+            encoded_df, mappings = CategoricalFeatureEncoder.label_encode(df_global, columns=columns)
+            return jsonify({
+                "status": "success",
+                "encoding_type": "label",
+                "columns_encoded": columns,
+                "mappings": mappings,
+                "sample": encoded_df.head(10).to_dict(orient="records"),
+            })
+        elif encoding_type == "one_hot":
+            drop_first = bool(payload.get("drop_first", False))
+            encoded_df, new_columns = CategoricalFeatureEncoder.one_hot_encode(
+                df_global, columns=columns, drop_first=drop_first
+            )
+            return jsonify({
+                "status": "success",
+                "encoding_type": "one_hot",
+                "columns_encoded": columns,
+                "generated_columns": new_columns,
+                "sample": encoded_df.head(10).to_dict(orient="records"),
+            })
+        else:
+            return jsonify({
+                "error": f"Unsupported encoding_type: '{encoding_type}'. Use 'label' or 'one_hot'.",
+                "status": "error",
+            }), 400
     except ValueError as e:
         return jsonify({"error": str(e), "status": "error"}), 400
 
