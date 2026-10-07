@@ -104,3 +104,12 @@ class Prereq(models.Model):
 
     class Meta:
         unique_together = ('course_id', 'prereq_id')
+
+class AuditLog(models.Model):
+    user_id = models.CharField(max_length=100)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    action = models.CharField(max_length=255)
+    detail = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return f"[{self.timestamp}] User {self.user_id}: {self.action}"
