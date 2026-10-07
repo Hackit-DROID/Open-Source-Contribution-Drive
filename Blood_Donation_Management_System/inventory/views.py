@@ -59,3 +59,13 @@ def stock_sharing_summary_view(request):
     ledger = BloodStockSharingLedger()
     summary = ledger.get_network_summary()
     return JsonResponse({"status": "success", "data": summary})
+
+
+def reclaim_expired_inventory_view(request):
+    """API endpoint to run automated blood inventory expiry audit and reclamation (CR-616)."""
+    from django.http import JsonResponse
+    from .reclamation_workflow import BloodInventoryReclamationEngine
+
+    engine = BloodInventoryReclamationEngine()
+    result = engine.scan_and_reclaim_expired_stock()
+    return JsonResponse({"status": "success", "data": result})
